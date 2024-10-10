@@ -98,12 +98,7 @@ async function executeSolanaTrade(tradeParams) {
 
 export {
   getPopularList,
-  fetchTradingData,
   getWalletHoldings,
   gmgnTokens,
-  getPairInfo,
-  getTradeQuote,
-  executeTrade,
-  getTradeStatus,
   executeSolanaTrade
 };
