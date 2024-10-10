@@ -34,6 +34,7 @@ async function executeSolanaSwap(inputToken, outputToken, amount, slippage, swap
       headers: {'Content-Type': 'application/json'}
     });
     console.log('Submit transaction response:', res);
+    res.data.lastValidBlockHeight = route.data.raw_tx.lastValidBlockHeight;
     return res;
   } catch (error) {
     console.error('Error executing Solana swap:', error);

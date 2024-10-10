@@ -1,10 +1,10 @@
 import dotenv from 'dotenv';
-import { insertData, selectData } from './db.js';
+import { insertData, selectData, updateData } from './db.js';
 import { initDatabase } from './dbInit.js';
 import { 
   getPopularList, 
   executeSolanaTrade,
-  gmgnTokens
+  getTransactionStatus
 } from './apiService.js';
 import { sendTgMessage } from './messagePush.js';
 
@@ -90,6 +90,7 @@ async function checkAndExecuteBuy() {
           await insertData('trade_records', {
             token_id: tokenId,
             hash: tradeResult.data.hash,
+            last_valid_block_height: tradeResult.data.lastValidBlockHeight,
             wallet_address: process.env.SOL_WALLET_ADDRESS,
             side: 'BUY',
             in_token:tradeData.inputToken,
@@ -183,6 +184,31 @@ async function checkAndExecuteSell() {
 }
 
 /**
+ * 检查待处理交易的状态
+ */
+async function checkPendingTransactions() {
+  try {
+    const pendingTransactions = await selectData('trade_records', { status: 'PENDING' });
+    
+    for (const transaction of pendingTransactions) {
+      const status = await getTransactionStatus(transaction.hash, transaction.last_valid_block_height);
+      
+      if (status === true) {
+        // 交易已确认，更新状态为 COMPLETED
+        await updateData('trade_records', { status: 'COMPLETED' }, { id: transaction.id });
+        console.log(`Transaction ${transaction.hash} completed`);
+      } else if (status === false) {
+        // 交易失败或过期，更新状态为 FAILED
+        await updateData('trade_records', { status: 'FAILED' }, { id: transaction.id });
+        console.log(`Transaction ${transaction.hash} failed`);
+      }
+      // 如果 status 不是 true 或 false，保持 PENDING 状态
+    }
+  } catch (error) {
+    console.error('Error checking pending transactions:', error);
+  }
+}
+/**
  * 运行交易机器人
  * 这个函数是机器人的主循环，每分钟执行一次
  */
@@ -192,6 +218,7 @@ async function runTradingBot() {
   await initDatabase(); // 初始化数据库
   setInterval(checkAndExecuteBuy, 1000 * 20); // 每5秒运行一次
   setInterval(checkAndExecuteSell, 1000 * 10); // 每10秒检查一次
+  setInterval(checkPendingTransactions, 1000 * 30); // 每30秒检查一次待处理交易
 }
 
 runTradingBot();
