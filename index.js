@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { pool, initDatabase } from './db.js';
+import { pool, initDatabase, insertData, selectData } from './db.js';
 import { 
   getPopularList, 
   fetchTradingData, 
@@ -9,6 +9,7 @@ import {
   getTradeStatus,
   executeSolanaTrade
 } from './apiService.js';
+import { sendTgMessage } from './messagePush.js';
 
 dotenv.config();
 
@@ -28,20 +29,15 @@ async function executeTradeWithLogging(tradeData) {
     if (tradeData.chain === 'solana') {
       tradeResult = await executeSolanaTrade(tradeData);
     } else {
-      // 获取交易报价
       const quoteData = await getTradeQuote(tradeData);
       console.log('Trade quote:', quoteData);
-
-      // 执行交易
       tradeResult = await executeTrade(quoteData);
     }
     console.log('Trade result:', tradeResult);
 
-    // 获取交易状态
     const tradeStatus = await getTradeStatus(tradeResult.data.hash);
     console.log('Trade status:', tradeStatus);
 
-    // 记录交易日志
     await insertData('trade_logs', { 
       action: tradeData.side, 
       details: JSON.stringify({
@@ -58,47 +54,69 @@ async function executeTradeWithLogging(tradeData) {
   }
 }
 
-/**
- * 1、通过gmgn.ai 赛选条件 获取热门token列表
- * 2、查询数据库是否已经买入过该token
- * 3、满足条件发送通知
- * 4、满足条件执行交易
- */
-
 async function runTradingBot() {
   console.log('Starting GMGN.ai trading bot...');
   
   await initDatabase();
 
   setInterval(async () => {
-    const tradingData = await fetchTradingData();
-    if (tradingData) {
-      await saveTradingData(tradingData);
-      
-      // 分析交易数据并决定是否执行交易
-      if (tradingData.signal === 'BUY' || tradingData.signal === 'SELL') {
-        try {
-          const tradeStatus = await executeTradeWithLogging({
-            chain: tradingData.chain,
-            side: tradingData.signal,
-            inputToken: tradingData.baseToken,
-            outputToken: tradingData.quoteToken,
-            amount: tradingData.amount,
-            fromAddress: process.env.WALLET_ADDRESS,
-            slippage: 0.5 // 可以从配置文件中读取
-          });
-          console.log('Trade completed with status:', tradeStatus);
-        } catch (error) {
-          console.error('Failed to execute trade:', error);
+    try {
+      // 1. 获取热门token列表
+      const popularTokens = await getPopularList({ time: '1h', limit: 50 });
+      console.log('Popular tokens:', popularTokens);
+
+      for (const token of popularTokens) {
+        // 2. 查询数据库是否已经买入过该token
+        const existingTrade = await selectData('trade_logs', { 'details->tradeData->outputToken': token.address });
+        
+        if (existingTrade.length === 0) {
+          // 3. 满足条件发送通知
+          const tokenInfo = await getPairInfo(token.address);
+          
+          // 这里可以添加更多的交易条件，例如：
+          const tradingConditions = 
+            tokenInfo.token.market_cap > 100000 && // 市值大于 10 万
+            tokenInfo.token.holder_count > 100 && // 持有者数量大于 100
+            tokenInfo.token.renounced_mint === 1 && // Mint 权限已放弃
+            tokenInfo.token.renounced_freeze_account === 1; // 无黑名单
+
+          if (tradingConditions) {
+            await sendTgMessage({
+              sniperAddress: process.env.WALLET_ADDRESS,
+              tokenAddress: token.address
+            });
+
+            // 4. 满足条件执行交易
+            const tradeData = {
+              chain: 'solana',
+              side: 'BUY',
+              inputToken: process.env.BASE_TOKEN_ADDRESS, // 假设使用 USDC 作为基础货币
+              outputToken: token.address,
+              amount: process.env.TRADE_AMOUNT, // 从环境变量中获取交易金额
+              fromAddress: process.env.WALLET_ADDRESS,
+              slippage: 1 // 1% 滑点
+            };
+
+            try {
+              const tradeStatus = await executeTradeWithLogging(tradeData);
+              console.log(`Trade executed for token ${token.symbol}, status:`, tradeStatus);
+            } catch (tradeError) {
+              console.error(`Failed to execute trade for token ${token.symbol}:`, tradeError);
+            }
+          }
         }
       }
-    }
 
-    // 获取热门token列表
-    const popularTokens = await getPopularList();
-    console.log('Popular tokens:', popularTokens);
-    // 这里可以添加处理热门token列表的逻辑
-  }, 60000); // 每分钟检查一次
+      // 获取并保存交易数据（如果需要的话）
+      const tradingData = await fetchTradingData();
+      if (tradingData) {
+        await saveTradingData(tradingData);
+      }
+
+    } catch (error) {
+      console.error('Error in trading bot cycle:', error);
+    }
+  }, 60000); // 每分钟运行一次
 }
 
 runTradingBot();
