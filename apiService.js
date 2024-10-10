@@ -11,13 +11,16 @@ const GMGN_API_URL = process.env.GMGN_API_URL;
  * @param {Object} params - 请求参数
  * @param {string} [params.time='1m'] - 时间范围
  * @param {number} [params.limit=20] - 返回结果数量限制
+ * @param {number} [params.max_marketcap=500000] - 最大市值
+ * @param {number} [params.min_holder_count=500] - 最少持仓地址
+ * @param {string} [params.min_created='2h'] - 最少创建时间
  * @returns {Promise<Array>} - 热门代币列表
  */
 async function getPopularList(params = {}) {
-  const { time = '1m', limit = 20 } = params;
+  const { time = '1m', limit = 20,max_marketcap =500000,min_holder_count=500,min_created='2h' } = params;
   try {
     // 构建 API 请求 URL
-    const url = `${GMGN_API_URL}/defi/quotation/v1/rank/sol/swaps/${time}?orderby=swaps&direction=desc&limit=${limit}&filters[]=renounced&filters[]=frozen`;
+    const url = `${GMGN_API_URL}/defi/quotation/v1/rank/sol/swaps/${time}?orderby=swaps&direction=desc&limit=${limit}&filters[]=renounced&filters[]=frozen&max_marketcap=${max_marketcap}&min_holder_count=${min_holder_count}&min_created=${min_created}`;
     
     // 发送 GET 请求获取热门列表
     const response = await sendRequest(url, { method: 'get' });
@@ -86,9 +89,9 @@ async function getWalletHoldings(walletAddress) {
 }
 
 async function executeSolanaTrade(tradeParams) {
-  const { inputToken, outputToken, amount, fromAddress, slippage } = tradeParams;
+  const { inputToken, outputToken, amount, slippage, swapMode, fee} = tradeParams;
   try {
-    const result = await executeSolanaSwap(inputToken, outputToken, amount, fromAddress, slippage);
+    const result = await executeSolanaSwap(inputToken, outputToken, amount, slippage, swapMode, fee);
     return result;
   } catch (error) {
     console.error('Error executing Solana trade:', error);
@@ -96,9 +99,18 @@ async function executeSolanaTrade(tradeParams) {
   }
 }
 
+async function getTransactionStatus(hash,lastValidBlockHeight) {
+  const statusUrl = `${API_HOST}/defi/router/v1/sol/tx/get_transaction_status?hash=${hash}&last_valid_height=${lastValidBlockHeight}`;
+  const status = await sendRequest(statusUrl, { method: 'get' });
+  console.log('Transaction status:', status);
+  if (status && (status.data.success === true || status.data.expired === true)) return true;
+  return false;
+}
+
 export {
   getPopularList,
   getWalletHoldings,
   gmgnTokens,
-  executeSolanaTrade
+  executeSolanaTrade,
+  getTransactionStatus
 };

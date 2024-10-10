@@ -61,12 +61,9 @@ function pushMsg(params) {
  */
 async function sendTgMessage(params = {}) {
   try {
-    const { sniperAddress, tokenAddress } = params;
-    const tokenInfo = await gmgnTokens(tokenAddress);
+    const { sniperAddress, tokenAddress, tokenInfo } = params;
     console.log('tokenInfo:', tokenInfo);
-    
     if (!tokenInfo.token.symbol) return;
-
     chatIds.forEach((chatId) => {
       const time = moment().format("YYYY/MM/DD HH:mm:ss");
       let text = `🔑密码来了🔑\n

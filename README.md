@@ -33,7 +33,7 @@
    DB_HOST=localhost
    DB_USER=你的数据库用户名
    DB_PASSWORD=你的数据库密码
-   DB_NAME=gmgn_trading_bot
+   DB_NAME=meme_trading_bot
    WALLET_ADDRESS=你的钱包地址
    PRIVATE_KEY=你的私钥（用于 Solana 交易）
    TG_BOT_TOKEN=你的Telegram机器人令牌

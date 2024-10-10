@@ -8,20 +8,17 @@ dotenv.config();
 
 const API_HOST = process.env.GMGN_API_URL;
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-async function executeSolanaSwap(inputToken, outputToken, amount, fromAddress, slippage) {
+async function executeSolanaSwap(inputToken, outputToken, amount, slippage, swapMode, fee) {
   try {
     // 钱包初始化
-    const wallet = new Wallet(Keypair.fromSecretKey(bs58.decode(process.env.PRIVATE_KEY || '')));
+    const wallet = new Wallet(Keypair.fromSecretKey(bs58.decode(process.env.SOL_PRIVATE_KEY)));
     console.log(`wallet address: ${wallet.publicKey.toString()}`);
+    const fromAddress = wallet.publicKey.toString()
 
     // 获取quote以及待签名交易
-    const quoteUrl = `${API_HOST}/defi/router/v1/sol/tx/get_swap_route?token_in_address=${inputToken}&token_out_address=${outputToken}&in_amount=${amount}&from_address=${fromAddress}&slippage=${slippage}`;
+    const quoteUrl = `${API_HOST}/defi/router/v1/sol/tx/get_swap_route?token_in_address=${inputToken}&token_out_address=${outputToken}&in_amount=${amount}&from_address=${fromAddress}&slippage=${slippage}&swap_mode=${swapMode}&fee=${fee}`;
     const route = await sendRequest(quoteUrl, { method: 'get' });
-    console.log('Route:', route);
+    console.log('Route:', quoteUrl, route);
 
     // 签名交易
     const swapTransactionBuf = Buffer.from(route.data.raw_tx.swapTransaction, 'base64');
@@ -37,19 +34,6 @@ async function executeSolanaSwap(inputToken, outputToken, amount, fromAddress, s
       headers: {'Content-Type': 'application/json'}
     });
     console.log('Submit transaction response:', res);
-
-    // 查询tx状态
-    while (true) {
-      const hash = res.data.hash;
-      const lastValidBlockHeight = route.data.raw_tx.lastValidBlockHeight;
-      const statusUrl = `${API_HOST}/defi/router/v1/sol/tx/get_transaction_status?hash=${hash}&last_valid_height=${lastValidBlockHeight}`;
-      const status = await sendRequest(statusUrl, { method: 'get' });
-      console.log('Transaction status:', status);
-      if (status && (status.data.success === true || status.data.expired === true))
-        break;
-      await sleep(1000);
-    }
-
     return res;
   } catch (error) {
     console.error('Error executing Solana swap:', error);
