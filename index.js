@@ -55,6 +55,61 @@ async function executeTradeWithLogging(tradeData) {
   }
 }
 
+/**
+ * 检查并执行卖出操作
+ */
+async function checkAndExecuteSell() {
+  try {
+    const walletAddress = process.env.WALLET_ADDRESS;
+    const holdings = await getWalletHoldings(walletAddress);
+
+    for (const holding of holdings) {
+      // 这里可以根据您的需求设置卖出条件
+      // 例如：盈利超过 20% 或亏损超过 10% 时卖出
+      const profitPercentage = (holding.unrealized_profit / holding.cost) * 100;
+      if (profitPercentage > 20 || profitPercentage < -10) {
+        console.log(`准备卖出 ${holding.symbol}，盈亏百分比: ${profitPercentage.toFixed(2)}%`);
+
+        const tradeData = {
+          chain: 'solana',
+          side: 'SELL',
+          inputToken: holding.token_address,
+          outputToken: process.env.BASE_TOKEN_ADDRESS, // 假设卖出后换成基础代币（如 USDC）
+          amount: holding.balance,
+          fromAddress: walletAddress,
+          slippage: 1,
+          price: holding.price
+        };
+
+        try {
+          const tradeResult = await executeTradeWithLogging(tradeData);
+          console.log(`Sell executed for token ${holding.symbol}, status:`, tradeResult);
+
+          // 更新数据库中的投资组合和交易记录
+          const tokenInfo = await selectData('token_info', { token_address: holding.token_address, network: 'solana' });
+          if (tokenInfo.length > 0) {
+            const tokenId = tokenInfo[0].id;
+            await updatePortfolio(tokenId, walletAddress, holding.balance, holding.price, 'SELL');
+            await recordTrade(tokenId, walletAddress, 'SELL', holding.balance, holding.price, tradeResult.data.hash);
+          }
+
+          // 发送 Telegram 消息通知
+          await sendTgMessage({
+            sniperAddress: walletAddress,
+            tokenAddress: holding.token_address,
+            action: 'SELL',
+            profitPercentage: profitPercentage
+          });
+        } catch (tradeError) {
+          console.error(`Failed to execute sell for token ${holding.symbol}:`, tradeError);
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error in checkAndExecuteSell:', error);
+  }
+}
+
 async function runTradingBot() {
   console.log('Starting GMGN.ai trading bot...');
   
@@ -113,7 +168,8 @@ async function runTradingBot() {
       if (tradingData) {
         await saveTradingData(tradingData);
       }
-
+      // 执行卖出逻辑
+      await checkAndExecuteSell();
     } catch (error) {
       console.error('Error in trading bot cycle:', error);
     }

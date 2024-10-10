@@ -63,6 +63,28 @@ async function gmgnTokens(tokenAddress) {
   }
 }
 
+/**
+ * 获取钱包持仓盈亏信息
+ * @param {string} walletAddress - 钱包地址
+ * @returns {Promise<Array>} - 持仓盈亏信息数组
+ */
+async function getWalletHoldings(walletAddress) {
+  try {
+    const url = `${GMGN_API_URL}/defi/quotation/v1/wallet/sol/holdings/${walletAddress}?orderby=unrealized_profit&direction=desc&showsmall=true&sellout=true`;
+    const response = await sendRequest(url, { method: 'get' });
+    
+    if (response.code !== 0) {
+      console.error('获取钱包持仓盈亏信息失败', response);
+      return [];
+    }
+    
+    return response.data.holdings;
+  } catch (error) {
+    console.error('获取钱包持仓盈亏信息出错:', error);
+    return [];
+  }
+}
+
 async function executeSolanaTrade(tradeParams) {
   const { inputToken, outputToken, amount, fromAddress, slippage } = tradeParams;
   try {
