@@ -13,46 +13,15 @@ const pool = mysql.createPool({
   queueLimit: 0
 });
 
-async function tableExists(tableName) {
-  const [rows] = await pool.query(`SHOW TABLES LIKE '${tableName}'`);
-  return rows.length > 0;
-}
-
-async function createTableIfNotExists(tableName, createTableSQL) {
-  if (!(await tableExists(tableName))) {
-    await pool.query(createTableSQL);
-    console.log(`Table ${tableName} created successfully`);
-  } else {
-    console.log(`Table ${tableName} already exists`);
-  }
-}
-
-async function initDatabase() {
-  try {
-    await createTableIfNotExists('trading_data', `
-      CREATE TABLE trading_data (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-        data JSON
-      )
-    `);
-
-    await createTableIfNotExists('trade_logs', `
-      CREATE TABLE trade_logs (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-        action ENUM('BUY', 'SELL'),
-        details JSON
-      )
-    `);
-
-    console.log('Database initialization completed');
-  } catch (error) {
-    console.error('Error initializing database:', error);
-  }
-}
-
-// 插入数据
+/**
+ * 插入数据到指定表
+ * @param {string} table - 表名
+ * @param {Object} data - 要插入的数据对象
+ * @returns {Promise<number>} - 插入的记录ID
+ * @example
+ * const newId = await insertData('users', { name: 'John Doe', email: 'john@example.com' });
+ * console.log('Inserted record ID:', newId);
+ */
 async function insertData(table, data) {
   const keys = Object.keys(data);
   const values = Object.values(data);
@@ -68,7 +37,16 @@ async function insertData(table, data) {
   }
 }
 
-// 查询数据
+/**
+ * 从指定表查询数据
+ * @param {string} table - 表名
+ * @param {Object} conditions - 查询条件
+ * @param {string} fields - 要查询的字段，默认为 '*'
+ * @returns {Promise<Array>} - 查询结果数组
+ * @example
+ * const users = await selectData('users', { role: 'admin' }, 'id, name, email');
+ * console.log('Admin users:', users);
+ */
 async function selectData(table, conditions = {}, fields = '*') {
   const whereClause = Object.keys(conditions).map(key => `${key} = ?`).join(' AND ');
   const query = `SELECT ${fields} FROM ${table}${whereClause ? ` WHERE ${whereClause}` : ''}`;
@@ -83,7 +61,16 @@ async function selectData(table, conditions = {}, fields = '*') {
   }
 }
 
-// 更新数据
+/**
+ * 更新指定表中的数据
+ * @param {string} table - 表名
+ * @param {Object} data - 要更新的数据
+ * @param {Object} conditions - 更新条件
+ * @returns {Promise<number>} - 受影响的行数
+ * @example
+ * const updatedRows = await updateData('users', { status: 'active' }, { id: 1 });
+ * console.log('Updated rows:', updatedRows);
+ */
 async function updateData(table, data, conditions) {
   const setClause = Object.keys(data).map(key => `${key} = ?`).join(', ');
   const whereClause = Object.keys(conditions).map(key => `${key} = ?`).join(' AND ');
@@ -99,7 +86,15 @@ async function updateData(table, data, conditions) {
   }
 }
 
-// 删除数据
+/**
+ * 从指定表删除数据
+ * @param {string} table - 表名
+ * @param {Object} conditions - 删除条件
+ * @returns {Promise<number>} - 受影响的行数
+ * @example
+ * const deletedRows = await deleteData('users', { status: 'inactive' });
+ * console.log('Deleted inactive users:', deletedRows);
+ */
 async function deleteData(table, conditions) {
   const whereClause = Object.keys(conditions).map(key => `${key} = ?`).join(' AND ');
   const query = `DELETE FROM ${table} WHERE ${whereClause}`;
@@ -116,7 +111,6 @@ async function deleteData(table, conditions) {
 
 export {
   pool,
-  initDatabase,
   insertData,
   selectData,
   updateData,

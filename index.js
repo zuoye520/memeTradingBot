@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
-import { pool, initDatabase, insertData, selectData } from './db.js';
+import { insertData, selectData } from './db.js';
+import { initDatabase } from './dbInit.js';
 import { 
   getPopularList, 
   fetchTradingData, 
