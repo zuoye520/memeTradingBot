@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 // 从环境变量中获取 Telegram Bot Token 和 Chat IDs
-const TG_BOT_TOKEN = process.env.TG_BOT_TOKEN || '7398992147:AAEuUl0PYNhdNjSTlyULN5Cvy9kJON5NwCM';
+const TG_BOT_TOKEN = process.env.TG_BOT_TOKEN;
 const chatIds = process.env.TG_CHAT_IDS ? process.env.TG_CHAT_IDS.split(',') : [];
 
 /**
