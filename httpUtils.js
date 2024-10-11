@@ -19,7 +19,7 @@ async function sendRequest(url, config) {
       throw error.response.data;
     } else if (error.request) {
       // 请求已发出，但没有收到响应
-      throw new Error('No response received from server');
+      throw new Error('No response received from server',error);
     } else {
       // 在设置请求时触发了错误
       throw error;

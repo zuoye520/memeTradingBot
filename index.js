@@ -23,11 +23,17 @@ async function checkAndExecuteBuy() {
   checkAndExecuteBuyStatus = false;
   try {
     // 1. 获取热门token列表
-    const popularTokens = await getPopularList({ time: '1m', limit: 1 });
-    console.log('热门代币:', popularTokens);
+    const popularTokens = await getPopularList({ 
+      time: '1m', 
+      limit: 20,
+      max_marketcap : 500000,//市值小于50万
+      min_holder_count : 500,//持仓地址大于500
+      min_created :'72h'//创建时间大于72小时24*3
+    });
+    // console.log('热门代币:', popularTokens);
     for (const token of popularTokens) {
       // 2. 查询数据库是否存在该token信息
-      const tokenInfo = await selectData('token_info', { token_address: token.address, network: token.chain });
+      const tokenInfo = await selectData('token_info', { token_address: token.address, chain: token.chain });
       if (tokenInfo.length <= 0) {
         // 3. 不存在则插入
         const tokenId = await insertData('token_info', {
@@ -59,7 +65,7 @@ async function checkAndExecuteBuy() {
             out_token: tradeData.outputToken,
             in_token_decimals: 9,
             out_token_decimals: 9,
-            in_token_amount: tradeData.amount,
+            in_token_amount: process.env.SOL_TRADE_AMOUNT,
             out_token_amount: 0,
             status: 'PENDING',
             priority_fee: process.env.SOL_PRIORITY_FEE,
@@ -73,7 +79,7 @@ async function checkAndExecuteBuy() {
         sendTgMessage({
           sniperAddress: process.env.SOL_WALLET_ADDRESS,
           tokenAddress: token.address,
-          memo:`买入操作，买入数量: ${tradeData.amount.toFixed(0)}SOL`
+          memo:`买入操作，买入数量: ${process.env.SOL_TRADE_AMOUNT}SOL`
         });
       } else {
         console.log(`代币 ${token.address} 在 token_info 表中，跳过`);
@@ -97,6 +103,7 @@ async function checkAndExecuteSell() {
 
     for (const holding of holdings) {
       // console.log('holding:',holding)
+      
       let sellAmount = 0;//卖出数量
       const profitPercentage = holding.unrealized_pnl * 100;//利润百分比 100%
       console.log(`${holding.symbol}，当前盈亏百分比: ${profitPercentage.toFixed(2)}%`)
@@ -109,18 +116,18 @@ async function checkAndExecuteSell() {
           break;
         case 2://卖出2次
           if(profitPercentage > 500) sellAmount = holding.balance / 2 //卖出50%
-          break;  
-        default:
+          break;
+        case 3://卖出3次
           if(profitPercentage > 1000) sellAmount = holding.balance / 2 //卖出50%
+          break;    
+        default:
           break;
       }
-      
       if (sellAmount > 0) {
         console.log(`准备卖出 ${holding.symbol}，盈亏百分比: ${profitPercentage.toFixed(2)}%，卖出数量: ${sellAmount.toFixed(0)}`);
         const symbol = holding.symbol;
         const address = holding.token_address
         const decimals = holding.decimals;
-        
         const tradeData = {
           swapMode: 'ExactOut',//TOKEN->SOL
           inputToken: address,//TOKEN
@@ -136,7 +143,10 @@ async function checkAndExecuteSell() {
             const tokenId = tokenInfo[0].id;
             const tradeRecords = await selectData('trade_records', { token_id: tokenId,status:'PENDING' });
             //交易记录中有未完成的记录，当前周期不进行交易
-            if(tradeRecords.length <=0) continue; 
+            if(tradeRecords.length > 0) {
+              console.log(`代币 ${symbol} 存在待完成的订单，本次不执行交易`);
+              continue; 
+            }
             //执行交易
             const tradeResult = await executeSolanaTrade(tradeData);
             console.log(`已为代币 ${symbol} 执行卖出，结果:`, tradeResult);
@@ -159,14 +169,19 @@ async function checkAndExecuteSell() {
               price: 0,
               gas_fee: 0
             });
-            
+            // 5. 推送消息
+            sendTgMessage({
+              sniperAddress: process.env.SOL_WALLET_ADDRESS,
+              tokenAddress: address,
+              memo:`卖出操作，当前盈亏百分比: ${profitPercentage.toFixed(2)}%，卖出数量: ${sellAmount.toFixed(0)}${symbol}`
+            });
+          }else{
+            await insertData('token_info', {
+              chain: 'sol',
+              token_address: address,
+              symbol: symbol,
+            });
           }
-          // 5. 推送消息
-          sendTgMessage({
-            sniperAddress: process.env.SOL_WALLET_ADDRESS,
-            tokenAddress: address,
-            memo:`卖出操作，当前盈亏百分比: ${profitPercentage.toFixed(2)}%，卖出数量: ${sellAmount.toFixed(0)}${symbol}`
-          });
         } catch (tradeError) {
           console.error(`为代币 ${holding.symbol} 执行卖出失败:`, tradeError);
         }
@@ -215,11 +230,10 @@ async function checkPendingTransactions() {
  */
 async function runTradingBot() {
   console.log('启动 GMGN.ai 交易机器人...');
-
   await initDatabase(); // 初始化数据库
-  // setInterval(checkAndExecuteBuy, 1000 * 10); // 每10秒运行一次
+  // setInterval(checkAndExecuteBuy, 1000 * 5); // 每10秒运行一次
   setInterval(checkAndExecuteSell, 1000 * 10); // 每10秒检查一次
-  // setInterval(checkPendingTransactions, 1000 * 30); // 每30秒检查一次待处理交易
+  setInterval(checkPendingTransactions, 1000 * 10); // 每30秒检查一次待处理交易
 }
 
 runTradingBot();

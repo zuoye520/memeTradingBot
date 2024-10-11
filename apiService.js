@@ -100,7 +100,7 @@ async function executeSolanaTrade(tradeParams) {
 }
 
 async function getTransactionStatus(hash,lastValidBlockHeight) {
-  const statusUrl = `${API_HOST}/defi/router/v1/sol/tx/get_transaction_status?hash=${hash}&last_valid_height=${lastValidBlockHeight}`;
+  const statusUrl = `${GMGN_API_URL}/defi/router/v1/sol/tx/get_transaction_status?hash=${hash}&last_valid_height=${lastValidBlockHeight}`;
   const status = await sendRequest(statusUrl, { method: 'get' });
   console.log('Transaction status:', statusUrl, status);
   if (status && (status.data.success === true)) return 'success';//上链成功
