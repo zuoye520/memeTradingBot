@@ -241,7 +241,7 @@ async function checkPendingTransactions() {
 async function runTradingBot() {
   console.log('启动 GMGN.ai 交易机器人...');
   await initDatabase(); // 初始化数据库
-  // setInterval(checkAndExecuteBuy, 1000 * 5); // 每10秒运行一次
+  setInterval(checkAndExecuteBuy, 1000 * 5); // 每10秒运行一次
   setInterval(checkAndExecuteSell, 1000 * 10); // 每10秒检查一次
   setInterval(checkPendingTransactions, 1000 * 10); // 每30秒检查一次待处理交易
 }
