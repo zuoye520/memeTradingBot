@@ -61,8 +61,9 @@ function pushMsg(params) {
  */
 async function sendTgMessage(params = {}) {
   try {
-    const { sniperAddress, tokenAddress, tokenInfo } = params;
-    console.log('tokenInfo:', tokenInfo);
+    const { sniperAddress, tokenAddress, memo ='' } = params;
+    const tokenInfo = gmgnTokens(tokenAddress);
+    // console.log('tokenInfo:', tokenInfo);
     if (!tokenInfo.token.symbol) return;
     chatIds.forEach((chatId) => {
       const time = moment().format("YYYY/MM/DD HH:mm:ss");
@@ -80,7 +81,7 @@ Mint权限丢弃检测: ${tokenInfo.token.renounced_mint === 1 ? '✅' : '❌'}
 烧池子检测: ${tokenInfo.token.burn_status == 'burn' ? '✅' : '❌'}
 Top10持仓: ${(tokenInfo.token.top_10_holder_rate * 100).toFixed(2)}%
 launchpad: ${tokenInfo.token.launchpad}\n
-是否开盘: ${tokenInfo.token.launchpad_status > 0 ? '已开盘' : '未开盘'}
+备注: ${memo}
 播报时间: ${time}`;
 
       sendMessage({
@@ -93,15 +94,6 @@ launchpad: ${tokenInfo.token.launchpad}\n
           ]
         },
         mode: "HTML"
-      });
-
-      pushMsg({
-        keyword1: `🔑密码来了🔑`,
-        keyword2: `${tokenInfo.token.symbol}`,
-        keyword3: `${tokenInfo.token.name}`,
-        keyword4: `${sniperAddress}`,
-        keyword5: `流通市值：${formatNumber(tokenInfo.token.market_cap * 1)}`,
-        keyword6: `${time}`,
       });
     });
   } catch (error) {

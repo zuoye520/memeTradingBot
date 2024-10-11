@@ -103,8 +103,9 @@ async function getTransactionStatus(hash,lastValidBlockHeight) {
   const statusUrl = `${API_HOST}/defi/router/v1/sol/tx/get_transaction_status?hash=${hash}&last_valid_height=${lastValidBlockHeight}`;
   const status = await sendRequest(statusUrl, { method: 'get' });
   console.log('Transaction status:', statusUrl, status);
-  if (status && (status.data.success === true || status.data.expired === true)) return true;
-  return false;
+  if (status && (status.data.success === true)) return 'success';//上链成功
+  if (status && (status.data.expired === true || status.data.failed === true)) return 'failed';//过期expired /失败failed
+  return 'undone';
 }
 
 export {
