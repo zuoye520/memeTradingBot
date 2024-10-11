@@ -1,7 +1,7 @@
 import { sendRequest } from './httpUtils.js';
 import dotenv from 'dotenv';
 import { executeSolanaSwap } from './solanaTrading.js';
-
+import { Connection, LAMPORTS_PER_SOL,PublicKey } from '@solana/web3.js';
 dotenv.config();
 
 const GMGN_API_URL = process.env.GMGN_API_URL;
@@ -99,6 +99,23 @@ async function executeSolanaTrade(tradeParams) {
   }
 }
 
+/**
+ * 获取 Solana 钱包余额
+ * @param {string} walletAddress - Solana 钱包地址
+ * @returns {Promise<number>} - 钱包余额（以 SOL 为单位）
+ */
+async function getSolanaBalance(walletAddress) {
+  try {
+    const connection = new Connection(process.env.SOLANA_RPC_URL, 'confirmed');
+    const accountKey = new PublicKey(walletAddress);
+    const balance = await connection.getBalance(accountKey);
+    return balance / LAMPORTS_PER_SOL;
+  } catch (error) {
+    console.error('获取 Solana 余额失败:', error);
+    throw error;
+  }
+}
+
 async function getTransactionStatus(hash,lastValidBlockHeight) {
   const statusUrl = `${GMGN_API_URL}/defi/router/v1/sol/tx/get_transaction_status?hash=${hash}&last_valid_height=${lastValidBlockHeight}`;
   const status = await sendRequest(statusUrl, { method: 'get' });
@@ -109,6 +126,7 @@ async function getTransactionStatus(hash,lastValidBlockHeight) {
 }
 
 export {
+  getSolanaBalance,
   getPopularList,
   getWalletHoldings,
   gmgnTokens,
