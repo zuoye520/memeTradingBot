@@ -9,8 +9,13 @@ import {
   getTransactionStatus
 } from './apiService.js';
 import { sendTgMessage } from './messagePush.js';
+import { decryptPrivateKey } from './keyManager.js';
 
 dotenv.config();
+
+// 在程序开始时解密私钥
+process.env.SOL_PRIVATE_KEY = decryptPrivateKey();
+
 //执行周期状态
 let checkAndExecuteBuyStatus = true,
   checkAndExecuteSellStatus = true,
@@ -118,12 +123,14 @@ async function checkAndExecuteSell() {
     const holdings = await getWalletHoldings(walletAddress);
 
     for (const holding of holdings) {
-      // console.log('holding:',holding)
-      
+      if(holding.is_show_alert) {
+        console.log(`${holding.symbol}，流动性不足，无法进行交易，跳过`);
+        continue;
+      }
       let sellAmount = 0;//卖出数量
       const profitPercentage = holding.unrealized_pnl * 100;//利润百分比 100%
       console.log(`${holding.symbol}，当前盈亏百分比: ${profitPercentage.toFixed(2)}%`)
-      if(profitPercentage > 50) sellAmount = holding.balance * 1;
+      if(profitPercentage > 50) sellAmount = holding.balance * 0.9;//卖出 90%
       // switch (holding.sells) {
       //   case 0://未卖出
       //     if(profitPercentage > 100) sellAmount = holding.balance / 2 //卖出50%
@@ -248,6 +255,7 @@ async function checkPendingTransactions() {
 async function runTradingBot() {
   console.log('启动 GMGN.ai 交易机器人...');
   await initDatabase(); // 初始化数据库
+  
   setInterval(checkAndExecuteBuy, 1000 * 5); // 每10秒运行一次
   setInterval(checkAndExecuteSell, 1000 * 5); // 每10秒检查一次
   setInterval(checkPendingTransactions, 1000 * 10); // 每30秒检查一次待处理交易

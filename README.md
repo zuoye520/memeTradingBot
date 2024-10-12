@@ -1,23 +1,34 @@
 # Meme 交易机器人
 
-这是一个基于 GMGN.ai API 的高级 meme 代币交易机器人。它使用 Node.js 实现，并集成了 MySQL 数据库用于数据存储和日志记录。该机器人支持多链交易，特别关注 Solana 链。
+这是一个基于 GMGN.ai API 的高级 meme 代币交易机器人。它使用 Node.js 实现，并集成了 MySQL 数据库用于数据存储和日志记录。该机器人专注于 Solana 链上的交易。
 
 ## 功能特性
 
 - 利用 GMGN.ai API 获取交易数据和热门代币列表
-- 基于预定义条件自动执行交易操作
+- 基于预定义条件自动执行买入和卖出操作
 - 支持 Solana 区块链上的交易
 - 将交易数据和日志存储到 MySQL 数据库
-- 定期（每分钟）检查并更新交易数据
-- 获取钱包持仓信息
-- 获取代币对信息
+- 定期检查并更新交易状态
+- 获取钱包持仓信息和盈亏情况
 - 通过 Telegram 发送交易通知
+- 私钥加密功能，提高安全性
+
+## 主要组件
+
+- `index.js`: 主程序文件，包含交易机器人的核心逻辑
+- `db.js`: 数据库连接和操作函数
+- `dbInit.js`: 数据库初始化和表创建
+- `apiService.js`: GMGN.ai API 服务封装
+- `httpUtils.js`: HTTP 请求工具函数
+- `solanaTrading.js`: Solana 交易相关函数
+- `messagePush.js`: 消息推送功能，包括 Telegram 通知
+- `keyManager.js`: 私钥加密和解密功能
 
 ## 安装
 
 1. 克隆仓库：
    ```
-   git clone https://github.com/zuoye520/memeTradingBot.git
+   git clone https://github.com/yourusername/memeTradingBot.git
    cd memeTradingBot
    ```
 
@@ -27,21 +38,16 @@
    ```
 
 3. 配置环境变量：
-   复制 `.env.example` 文件为 `.env`，然后编辑 `.env` 文件，填入你的实际配置：
-   ```
-   GMGN_API_URL=http://your-api-url
-   DB_HOST=localhost
-   DB_USER=你的数据库用户名
-   DB_PASSWORD=你的数据库密码
-   DB_NAME=meme_trading_bot
-   WALLET_ADDRESS=你的钱包地址
-   PRIVATE_KEY=你的私钥（用于 Solana 交易）
-   TG_BOT_TOKEN=你的Telegram机器人令牌
-   TG_CHAT_IDS=Telegram聊天ID列表，用逗号分隔
-   ```
+   复制 `.env.example` 文件为 `.env`，然后编辑 `.env` 文件，填入你的实际配置。
 
-4. 初始化数据库：
-   确保你有一个运行中的 MySQL 服务器，并创建了一个名为 `gmgn_trading_bot` 的数据库。
+4. 加密私钥：
+   ```
+   npm run encrypt
+   ```
+   这将提示你输入你的 Solana 私钥和一个用于加密的密码。加密后的私钥将保存在 `.encrypted_private_key` 文件中。
+
+5. 更新 `.env` 文件：
+   添加 `ENCRYPTED_PRIVATE_KEY_FILE=.encrypted_private_key`。
 
 ## 使用方法
 
@@ -51,19 +57,26 @@
 npm start
 ```
 
-机器人将开始运行，每分钟从 GMGN.ai API 获取一次数据，并根据预定义的条件执行交易操作。
+首次运行时，系统会提示你输入密码来解密私钥。
 
-## 项目结构
+机器人启动后将执行以下操作：
 
-- `index.js`: 主程序文件，包含交易机器人的核心逻辑
-- `db.js`: 数据库连接、初始化脚本和数据库操作函数
-- `dbInit.js`: 数据库初始化和表创建
-- `apiService.js`: GMGN.ai API 服务封装
-- `httpUtils.js`: HTTP 请求工具函数
-- `solanaTrading.js`: Solana 交易相关函数
-- `messagePush.js`: 消息推送功能，包括 Telegram 通知
-- `.env`: 环境变量配置文件
-- `package.json`: 项目依赖和脚本配置
+1. 初始化数据库
+2. 每 5 秒检查并执行买入操作
+3. 每 5 秒检查并执行卖出操作
+4. 每 10 秒检查待处理交易的状态
+
+## 交易策略
+
+### 买入策略
+- 检查 SOL 余额，确保有足够的资金进行交易
+- 获取符合条件的热门代币列表（市值小于 50 万，持仓地址大于 300，创建时间大于 12 小时）
+- 排除未被 CTO 接管或短期内跌幅过大的代币
+- 对符合条件的代币执行买入操作
+
+### 卖出策略
+- 检查钱包中的代币持仓
+- 当某个代币的未实现盈利超过 50% 时，执行全部卖出操作
 
 ## 注意事项
 

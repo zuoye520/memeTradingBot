@@ -3,6 +3,7 @@ node_modules/
 
 # Environment variables
 .env
+.encrypted_private_key
 
 # Logs
 logs
