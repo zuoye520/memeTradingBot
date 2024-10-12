@@ -121,7 +121,7 @@ async function getTransactionStatus(hash,lastValidBlockHeight) {
   const status = await sendRequest(statusUrl, { method: 'get' });
   console.log('Transaction status:', statusUrl, status);
   if (status && (status.data.success === true)) return 'success';//上链成功
-  if (status && (status.data.expired === true || status.data.failed === true)) return 'failed';//过期expired /失败failed
+  if (status && (status.data.success === false || status.data.expired === true || status.data.failed === true)) return 'failed';//过期expired /失败failed
   return 'undone';
 }
 

@@ -37,11 +37,17 @@ async function checkAndExecuteBuy() {
       time: '1m', 
       limit: 20,
       max_marketcap : 500000,//市值小于50万
-      min_holder_count : 500,//持仓地址大于500
-      min_created :'72h'//创建时间大于72小时24*3
+      min_holder_count : 300,//持仓地址大于500
+      min_created :'12h'//创建时间大于72小时24*3
     });
     // console.log('热门代币:', popularTokens);
     for (const token of popularTokens) {
+      //排除CTO未接管，1m/5m/1h 跌幅太多的标的
+      const condition = token.cto_flag === 0 || token.price_change_percent1m <= -5 || token.price_change_percent5m <= -10 || token.price_change_percent1h <= -30;
+      if(condition){
+        console.log(`代币 ${token.address} 未接管，1m/5m/1h 跌幅太大，跳过`);
+        continue;
+      }
       // 2. 查询数据库是否存在该token信息
       const tokenInfo = await selectData('token_info', { token_address: token.address, chain: token.chain });
       if (tokenInfo.length <= 0) {
@@ -117,22 +123,23 @@ async function checkAndExecuteSell() {
       let sellAmount = 0;//卖出数量
       const profitPercentage = holding.unrealized_pnl * 100;//利润百分比 100%
       console.log(`${holding.symbol}，当前盈亏百分比: ${profitPercentage.toFixed(2)}%`)
-      switch (holding.sells) {
-        case 0://未卖出
-          if(profitPercentage > 100) sellAmount = holding.balance / 2 //卖出50%
-          break;
-        case 1://卖出1次
-          if(profitPercentage > 200) sellAmount = holding.balance / 2 //卖出50%
-          break;
-        case 2://卖出2次
-          if(profitPercentage > 500) sellAmount = holding.balance / 2 //卖出50%
-          break;
-        case 3://卖出3次
-          if(profitPercentage > 1000) sellAmount = holding.balance / 2 //卖出50%
-          break;    
-        default:
-          break;
-      }
+      if(profitPercentage > 50) sellAmount = holding.balance * 1;
+      // switch (holding.sells) {
+      //   case 0://未卖出
+      //     if(profitPercentage > 100) sellAmount = holding.balance / 2 //卖出50%
+      //     break;
+      //   case 1://卖出1次
+      //     if(profitPercentage > 200) sellAmount = holding.balance / 2 //卖出50%
+      //     break;
+      //   case 2://卖出2次
+      //     if(profitPercentage > 500) sellAmount = holding.balance / 2 //卖出50%
+      //     break;
+      //   case 3://卖出3次
+      //     if(profitPercentage > 1000) sellAmount = holding.balance / 2 //卖出50%
+      //     break;    
+      //   default:
+      //     break;
+      // }
       if (sellAmount > 0) {
         console.log(`准备卖出 ${holding.symbol}，盈亏百分比: ${profitPercentage.toFixed(2)}%，卖出数量: ${sellAmount.toFixed(0)}`);
         const symbol = holding.symbol;
@@ -242,7 +249,7 @@ async function runTradingBot() {
   console.log('启动 GMGN.ai 交易机器人...');
   await initDatabase(); // 初始化数据库
   setInterval(checkAndExecuteBuy, 1000 * 5); // 每10秒运行一次
-  setInterval(checkAndExecuteSell, 1000 * 10); // 每10秒检查一次
+  setInterval(checkAndExecuteSell, 1000 * 5); // 每10秒检查一次
   setInterval(checkPendingTransactions, 1000 * 10); // 每30秒检查一次待处理交易
 }
 
