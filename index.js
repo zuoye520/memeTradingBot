@@ -75,6 +75,10 @@ async function checkAndExecuteBuy() {
           const tradeResult = await executeSolanaTrade(tradeData);
 
           console.log(`已为代币 ${token.symbol} 执行交易，结果:`, tradeResult);
+          if(!tradeResult.data.hash) {
+            console.log(`交易失败，交易结果:`, tradeResult);
+            continue;
+          }
           // 5. 记录交易到数据库
           await insertData('trade_records', {
             token_id: tokenId,
@@ -174,7 +178,10 @@ async function checkAndExecuteSell() {
             //执行交易
             const tradeResult = await executeSolanaTrade(tradeData);
             console.log(`已为代币 ${symbol} 执行卖出，结果:`, tradeResult);
-
+            if(!tradeResult.data.hash) {
+              console.log(`交易失败，交易结果:`, tradeResult);
+              continue;
+            }
             //查询是否有存在待完成的交易
             await insertData('trade_records', {
               token_id: tokenId,
