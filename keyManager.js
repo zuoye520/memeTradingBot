@@ -44,9 +44,14 @@ export function decryptPrivateKey() {
   }
 
   const encryptedPrivateKey = fs.readFileSync(encryptedKeyFile, 'utf8');
-  const password = readlineSync.question('请输入解密密码: ', {
-    hideEchoBack: true
-  });
+  
+  // 从环境变量中读取密码，如果没有则提示输入
+  let password = process.env.DECRYPT_PASSWORD;
+  if (!password) {
+    password = readlineSync.question('请输入解密密码: ', {
+      hideEchoBack: true
+    });
+  }
 
   try {
     const decryptedPrivateKey = CryptoJS.AES.decrypt(encryptedPrivateKey, password).toString(CryptoJS.enc.Utf8);
