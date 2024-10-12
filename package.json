@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node index.js",
     "encrypt": "node -e \"import('./keyManager.js').then(({encryptPrivateKey}) => encryptPrivateKey())\"",
-    "pm2:start": "pm2 start start.js --name meme-trading-bot"
+    "pm2:start": "node start.js"
   },
   "dependencies": {
     "@project-serum/anchor": "^0.26.0",
