@@ -137,16 +137,16 @@ async function checkAndExecuteSell() {
       // if(profitPercentage > 50 && holding.sells < 1) sellAmount = holding.balance * 0.9;//卖出 90%
       switch (holding.sells) {
         case 0://未卖出
-          if(profitPercentage > 50) sellAmount = holding.balance * 0.9 //卖出90%
+          if(profitPercentage > 30) sellAmount = holding.balance * 1 //卖出90%
           break;
         case 1://卖出1次
-          if(profitPercentage > 500) sellAmount = holding.balance / 2 //卖出50%
+          if(profitPercentage > 50) sellAmount = holding.balance * 1 //卖出50%
           break;
         case 2://卖出2次
-          if(profitPercentage > 1000) sellAmount = holding.balance / 2 //卖出50%
+          if(profitPercentage > 100) sellAmount = holding.balance * 1 //卖出50%
           break;
         case 3://卖出3次
-          if(profitPercentage > 2000) sellAmount = holding.balance / 2 //卖出50%
+          if(profitPercentage > 120) sellAmount = holding.balance * 1 //卖出50%
           break;    
         default:
           break;
