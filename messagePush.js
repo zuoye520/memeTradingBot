@@ -63,7 +63,7 @@ async function sendTgMessage(params = {}) {
   try {
     const { sniperAddress, tokenAddress, memo ='' } = params;
     const tokenInfo = await gmgnTokens(tokenAddress);
-    console.log('tokenInfo:', tokenInfo);
+    // console.log('tokenInfo:', tokenInfo);
     if (!tokenInfo.token.symbol) return;
     chatIds.forEach((chatId) => {
       const time = moment().format("YYYY/MM/DD HH:mm:ss");
@@ -71,8 +71,8 @@ async function sendTgMessage(params = {}) {
 Sniper Address: <code>${sniperAddress}</code>\n
 Token Symbol: ${tokenInfo.token.symbol} (${tokenInfo.token.name})
 Token Address: <code>${tokenInfo.token.address}</code>
-总市值: ${formatNumber(tokenInfo.token.fdv * 1)}
-流通市值: ${formatNumber(tokenInfo.token.market_cap * 1)}
+总市值: $${formatNumber(tokenInfo.token.fdv * 1)}
+流通市值: $${formatNumber(tokenInfo.token.market_cap * 1)}
 当前池子: ${tokenInfo.token.pool_info && formatNumber(tokenInfo.token.pool_info.quote_reserve * 1)} ${tokenInfo.token.pool_info && tokenInfo.token.pool_info.quote_symbol}
 初始池子: ${tokenInfo.token.pool_info && formatNumber(tokenInfo.token.pool_info.initial_quote_reserve * 1)} ${tokenInfo.token.pool_info && tokenInfo.token.pool_info.quote_symbol}
 持有者: ${tokenInfo.token.holder_count}
