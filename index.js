@@ -134,7 +134,7 @@ async function checkAndExecuteSell() {
       let sellAmount = 0;//卖出数量
       const profitPercentage = holding.unrealized_pnl * 100;//利润百分比 100%
       console.log(`${holding.symbol}，当前盈亏百分比: ${profitPercentage.toFixed(2)}%`)
-      if(profitPercentage > 50) sellAmount = holding.balance * 0.9;//卖出 90%
+      if(profitPercentage > 50 && holding.sells < 1) sellAmount = holding.balance * 0.9;//卖出 90%
       // switch (holding.sells) {
       //   case 0://未卖出
       //     if(profitPercentage > 100) sellAmount = holding.balance / 2 //卖出50%
