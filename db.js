@@ -109,10 +109,51 @@ async function deleteData(table, conditions) {
   }
 }
 
+/**
+ * 删除指定时间之前的token数据及相关交易记录
+ * @param {number} days - 要删除的天数（从现在往前算）
+ * @returns {Promise<Object>} - 删除的记录数
+ */
+async function deleteOldData(days) {
+  const cutoffDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString().slice(0, 19).replace('T', ' ');
+  
+  try {
+    // 开始事务
+    await pool.query('START TRANSACTION');
+
+    // 删除旧的交易记录
+    const [tradeResult] = await pool.query(`
+      DELETE tr FROM trade_records tr
+      INNER JOIN token_info ti ON tr.token_id = ti.id
+      WHERE ti.last_updated <= ?
+    `, [cutoffDate]);
+
+    // 删除旧的token信息
+    const [tokenResult] = await pool.query(`
+      DELETE FROM token_info
+      WHERE last_updated <= ?
+    `, [cutoffDate]);
+
+    // 提交事务
+    await pool.query('COMMIT');
+
+    return {
+      deletedTradeRecords: tradeResult.affectedRows,
+      deletedTokens: tokenResult.affectedRows
+    };
+  } catch (error) {
+    // 如果出错，回滚事务
+    await pool.query('ROLLBACK');
+    console.error('Error deleting old data:', error);
+    throw error;
+  }
+}
+
 export {
   pool,
   insertData,
   selectData,
   updateData,
-  deleteData
+  deleteData,
+  deleteOldData
 };

@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { insertData, selectData, updateData } from './db.js';
+import { insertData, selectData, updateData, deleteOldData } from './db.js';
 import { initDatabase } from './dbInit.js';
 import {
   getSolanaBalance,
@@ -134,23 +134,23 @@ async function checkAndExecuteSell() {
       let sellAmount = 0;//卖出数量
       const profitPercentage = holding.unrealized_pnl * 100;//利润百分比 100%
       console.log(`${holding.symbol}，当前盈亏百分比: ${profitPercentage.toFixed(2)}%`)
-      // if(profitPercentage > 50 && holding.sells < 1) sellAmount = holding.balance * 0.9;//卖出 90%
-      switch (holding.sells) {
-        case 0://未卖出
-          if(profitPercentage > 30) sellAmount = holding.balance * 1 //卖出90%
-          break;
-        case 1://卖出1次
-          if(profitPercentage > 50) sellAmount = holding.balance * 1 //卖出50%
-          break;
-        case 2://卖出2次
-          if(profitPercentage > 100) sellAmount = holding.balance * 1 //卖出50%
-          break;
-        case 3://卖出3次
-          if(profitPercentage > 120) sellAmount = holding.balance * 1 //卖出50%
-          break;    
-        default:
-          break;
-      }
+      if(profitPercentage > 30) sellAmount = holding.balance * 1;//卖出 100%
+      // switch (holding.sells) {
+      //   case 0://未卖出
+      //     if(profitPercentage > 30) sellAmount = holding.balance * 1 //卖出90%
+      //     break;
+      //   case 1://卖出1次
+      //     if(profitPercentage > 50) sellAmount = holding.balance * 1 //卖出50%
+      //     break;
+      //   case 2://卖出2次
+      //     if(profitPercentage > 100) sellAmount = holding.balance * 1 //卖出50%
+      //     break;
+      //   case 3://卖出3次
+      //     if(profitPercentage > 120) sellAmount = holding.balance * 1 //卖出50%
+      //     break;    
+      //   default:
+      //     break;
+      // }
       if (sellAmount > 0) {
         console.log(`准备卖出 ${holding.symbol}，盈亏百分比: ${profitPercentage.toFixed(2)}%，卖出数量: ${sellAmount.toFixed(0)}`);
         const symbol = holding.symbol;
@@ -253,7 +253,19 @@ async function checkPendingTransactions() {
   checkPendingTransactionsStatus = true;
 }
 
-
+/**
+ * 清理旧数据的定时任务
+ */
+async function cleanupOldData() {
+  // 设置清理数据的天数
+  const CLEANUP_DAYS = 2; // 2天
+  try {
+    const result = await deleteOldData(CLEANUP_DAYS);
+    console.log(`清理完成: 删除了 ${result.deletedTokens} 个${CLEANUP_DAYS}天前的旧token和 ${result.deletedTradeRecords} 条相关交易记录`);
+  } catch (error) {
+    console.error('清理旧数据时出错:', error);
+  }
+}
 
 /**
  * 运行交易机器人
@@ -266,6 +278,7 @@ async function runTradingBot() {
   setInterval(checkAndExecuteBuy, 1000 * 5); // 每10秒运行一次
   setInterval(checkAndExecuteSell, 1000 * 5); // 每10秒检查一次
   setInterval(checkPendingTransactions, 1000 * 10); // 每30秒检查一次待处理交易
+  setInterval(cleanupOldData, 1000 * 60 * 10); // 每10分钟运行一次清理任务
 }
 
 runTradingBot();
