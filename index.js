@@ -50,7 +50,7 @@ async function checkAndExecuteBuy() {
       //排除CTO未接管，1m/5m/1h 跌幅太多的标的
       const condition = token.cto_flag === 0 || token.price_change_percent1m <= -5 || token.price_change_percent5m <= -10 || token.price_change_percent1h <= -30;
       if(condition){
-        console.log(`代币 ${token.address} 未接管，1m/5m/1h 跌幅太大，跳过`);
+        console.log(`代币 ${symbol} ${token.address} 未接管，1m/5m/1h 跌幅太大，跳过`);
         continue;
       }
       // 2. 查询数据库是否存在该token信息
@@ -126,14 +126,15 @@ async function checkAndExecuteSell() {
     const walletAddress = process.env.SOL_WALLET_ADDRESS;
     const holdings = await getWalletHoldings(walletAddress);
 
-    for (const holding of holdings) {
+    for (let holding of holdings) {
+      holding = {...holding, ...holding.token}
       if(holding.is_show_alert) {
         console.log(`${holding.symbol}，流动性不足，无法进行交易，跳过`);
         continue;
       }
       let sellAmount = 0;//卖出数量
       const profitPercentage = holding.unrealized_pnl * 100;//利润百分比 100%
-      console.log(`${holding.symbol}，当前盈亏百分比: ${profitPercentage.toFixed(2)}%`)
+      console.log(`代币：${holding.symbol}，当前盈亏百分比: ${profitPercentage.toFixed(2)}%`)
       if(profitPercentage > 30) sellAmount = holding.balance * 1;//卖出 100%
       // switch (holding.sells) {
       //   case 0://未卖出
