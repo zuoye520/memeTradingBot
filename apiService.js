@@ -21,7 +21,7 @@ async function getPopularList(params = {}) {
   try {
     // 构建 API 请求 URL
     const url = `${GMGN_API_URL}/defi/quotation/v1/rank/sol/swaps/${time}?orderby=swaps&direction=desc&limit=${limit}&filters[]=renounced&filters[]=frozen&max_marketcap=${max_marketcap}&min_holder_count=${min_holder_count}&min_created=${min_created}`;
-    
+    console.log('getPopularList:',url)
     // 发送 GET 请求获取热门列表
     const response = await sendRequest(url, { method: 'get' });
     
@@ -73,7 +73,7 @@ async function gmgnTokens(tokenAddress) {
  */
 async function getWalletHoldings(walletAddress) {
   try {
-    const url = `${GMGN_API_URL}/defi/quotation/v1/wallet/sol/holdings/${walletAddress}?orderby=unrealized_profit&direction=desc&showsmall=true&sellout=true`;
+    const url = `${GMGN_API_URL}/api/v1/wallet_holdings/sol/${walletAddress}?orderby=unrealized_profit&direction=desc&showsmall=true&sellout=true`;
     console.log('getWalletHoldings:',url)
     const response = await sendRequest(url, { method: 'get' });
     
