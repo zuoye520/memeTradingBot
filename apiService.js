@@ -74,6 +74,7 @@ async function gmgnTokens(tokenAddress) {
 async function getWalletHoldings(walletAddress) {
   try {
     const url = `${GMGN_API_URL}/defi/quotation/v1/wallet/sol/holdings/${walletAddress}?orderby=unrealized_profit&direction=desc&showsmall=true&sellout=true`;
+    console.log('getWalletHoldings:',url)
     const response = await sendRequest(url, { method: 'get' });
     
     if (response.code !== 0) {
