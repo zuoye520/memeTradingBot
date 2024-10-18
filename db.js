@@ -114,8 +114,7 @@ async function deleteData(table, conditions) {
  * @param {number} days - 要删除的天数（从现在往前算）
  * @returns {Promise<Object>} - 删除的记录数
  */
-async function deleteOldData(days) {
-  const cutoffDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString().slice(0, 19).replace('T', ' ');
+async function deleteOldData(days =3) {
   
   try {
     // 开始事务
@@ -125,14 +124,14 @@ async function deleteOldData(days) {
     const [tradeResult] = await pool.query(`
       DELETE tr FROM trade_records tr
       INNER JOIN token_info ti ON tr.token_id = ti.id
-      WHERE ti.last_updated <= ?
-    `, [cutoffDate]);
+      WHERE ti.last_updated <= NOW() - INTERVAL ? DAY
+    `, [days]);
 
     // 删除旧的token信息
     const [tokenResult] = await pool.query(`
       DELETE FROM token_info
-      WHERE last_updated <= ?
-    `, [cutoffDate]);
+      WHERE last_updated <= NOW() - INTERVAL ? DAY
+    `, [days]);
 
     // 提交事务
     await pool.query('COMMIT');

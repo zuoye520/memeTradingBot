@@ -32,7 +32,7 @@ async function checkAndExecuteBuy() {
     const solBalance = await getSolanaBalance(process.env.SOL_WALLET_ADDRESS);
     const requiredBalance = parseFloat(process.env.SOL_TRADE_AMOUNT) + parseFloat(process.env.SOL_PRIORITY_FEE);
     console.log(`SOL 当前余额: ${solBalance} SOL`);
-    if (solBalance < requiredBalance * 2) {
+    if (solBalance < requiredBalance * 1.5) {
       console.log(`SOL 余额不足。当前余额: ${solBalance} SOL, 需要: ${requiredBalance} SOL`);
       checkAndExecuteBuyStatus = true;
       return;
