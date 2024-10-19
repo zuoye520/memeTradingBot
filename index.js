@@ -1,6 +1,8 @@
 import dotenv from 'dotenv';
 import { insertData, selectData, updateData, deleteOldData } from './db.js';
+import redisManager from './redisManager.js';
 import { initDatabase } from './dbInit.js';
+
 import {
   getSolanaBalance,
   getPopularList,
@@ -12,21 +14,23 @@ import { sendTgMessage } from './messagePush.js';
 import { decryptPrivateKey } from './keyManager.js';
 
 dotenv.config();
-
+const sleep = (seconds) => {
+  const milliseconds = seconds * 1000;
+  
+  return new Promise(resolve => setTimeout(resolve, milliseconds));
+};
 // 在程序开始时解密私钥
 process.env.SOL_PRIVATE_KEY = decryptPrivateKey();
-
-//执行周期状态
-let checkAndExecuteBuyStatus = true,
-  checkAndExecuteSellStatus = true,
-  checkPendingTransactionsStatus = true;
-
 /**
  * 检查并执行买入操作
  */
 async function checkAndExecuteBuy() {
-  if (checkAndExecuteBuyStatus === false) return;
-  checkAndExecuteBuyStatus = false;
+  const lockKey = 'check_buy_lock';
+  const lockSet = await redisManager.setTimeLock(lockKey, 20);//流程20秒
+  if (!lockSet) {
+    console.log('checkAndExecuteBuy 锁已存在，操作被阻止');
+    return;
+  } 
   try {
     // 检查 SOL 余额
     const solBalance = await getSolanaBalance(process.env.SOL_WALLET_ADDRESS);
@@ -34,7 +38,6 @@ async function checkAndExecuteBuy() {
     console.log(`SOL 当前余额: ${solBalance} SOL`);
     if (solBalance < requiredBalance * 1.5) {
       console.log(`SOL 余额不足。当前余额: ${solBalance} SOL, 需要: ${requiredBalance} SOL`);
-      checkAndExecuteBuyStatus = true;
       return;
     }
     // 1. 获取热门token列表
@@ -56,13 +59,13 @@ async function checkAndExecuteBuy() {
       // 2. 查询数据库是否存在该token信息
       const tokenInfo = await selectData('token_info', { token_address: token.address, chain: token.chain });
       if (tokenInfo.length <= 0) {
-        // 3. 不存在则插入
-        const tokenId = await insertData('token_info', {
-          chain: token.chain,
-          token_address: token.address,
-          symbol: token.symbol,
-        });
-        // 4. 满足条件执行交易
+        //设置token 购买时间锁
+        const tokenLockSet = await redisManager.setTimeLock(token.address, 60*60*24);//锁 24小时
+        if(!tokenLockSet){
+          console.log(`${token.symbol} ${token.address} token锁已存在，操作被阻止`);
+          continue;
+        }
+        // 3. 满足条件执行交易
         const tradeData = {
           swapMode: 'ExactIn',//SOL->TOKEN
           inputToken: process.env.SOL_ADDRESS,
@@ -73,12 +76,19 @@ async function checkAndExecuteBuy() {
         };
         try {
           const tradeResult = await executeSolanaTrade(tradeData);
-
           console.log(`已为代币 ${token.symbol} 执行交易，结果:`, tradeResult);
-          if(!tradeResult.data.hash) {
+          if(!tradeResult || !tradeResult.data || !tradeResult.data.hash) {
             console.log(`交易失败，交易结果:`, tradeResult);
+            //交易失败,删除缓存锁
+            await redisManager.del(token.address);
             continue;
           }
+          // 4. 不存在则插入
+          const tokenId = await insertData('token_info', {
+            chain: token.chain,
+            token_address: token.address,
+            symbol: token.symbol,
+          });
           // 5. 记录交易到数据库
           await insertData('trade_records', {
             token_id: tokenId,
@@ -100,28 +110,36 @@ async function checkAndExecuteBuy() {
         } catch (tradeError) {
           console.error(`为代币 ${token.symbol} 执行交易失败:`, tradeError);
         }
-        // 5. 推送消息
+        // 6. 推送消息
         sendTgMessage({
           sniperAddress: process.env.SOL_WALLET_ADDRESS,
           tokenAddress: token.address,
           memo:`买入操作，买入数量: ${process.env.SOL_TRADE_AMOUNT}SOL`
         });
       } else {
-        console.log(`代币 ${token.address} 在 token_info 表中，跳过`);
+        console.log(`代币${token.symbol}，${token.address} 在 token_info 表中，跳过`);
       }
     }
   } catch (error) {
     console.error('交易机器人周期出错:', error);
+  } finally{
+    console.log('checkAndExecuteBuy finally');
+    //删除流程锁
+    await redisManager.del(lockKey);
   }
-  checkAndExecuteBuyStatus = true;
+  
 }
 
 /**
  * 检查并执行卖出操作
  */
 async function checkAndExecuteSell() {
-  if (checkAndExecuteSellStatus === false) return;
-  checkAndExecuteSellStatus = false;
+  const lockKey = 'check_sell_lock';
+  const lockSet = await redisManager.setTimeLock(lockKey, 20);//流程20秒
+  if (!lockSet) {
+    console.log('checkAndExecuteSell 锁已存在，操作被阻止');
+    return;
+  } 
   try {
     const walletAddress = process.env.SOL_WALLET_ADDRESS;
     const holdings = await getWalletHoldings(walletAddress);
@@ -221,16 +239,25 @@ async function checkAndExecuteSell() {
     }
   } catch (error) {
     console.error('检查并执行卖出操作失败:', error);
+  } finally{
+    console.log('checkAndExecuteSell finally');
+    //删除流程锁
+    await redisManager.del(lockKey);
   }
-  checkAndExecuteSellStatus = true;
 }
+
+
 
 /**
  * 检查待处理交易的状态
  */
 async function checkPendingTransactions() {
-  if (checkPendingTransactionsStatus === false) return;
-  checkPendingTransactionsStatus = false;
+  const lockKey = 'check_pending_lock';
+  const lockSet = await redisManager.setTimeLock(lockKey, 20);//流程20秒
+  if (!lockSet) {
+    console.log('checkPendingTransactions 锁已存在，操作被阻止');
+    return;
+  } 
   try {
     const pendingTransactions = await selectData('trade_records', { status: 'PENDING' });
 
@@ -245,13 +272,21 @@ async function checkPendingTransactions() {
         // 交易失败或过期，更新状态为 FAILED
         await updateData('trade_records', { status: 'FAILED' }, { id: transaction.id });
         console.log(`Transaction ${transaction.hash} failed`);
+        //交易失败,删除缓存时间锁(买单才删除)
+        if(transaction.out_token != 'So11111111111111111111111111111111111111112'){
+          await redisManager.del(transaction.out_token);
+        }
       }
       // 如果 status 不是 success 或 failed，保持 PENDING 状态
     }
   } catch (error) {
     console.error('Error checking pending transactions:', error);
+  } finally{
+    console.log('checkPendingTransactions finally')
+    //删除流程锁
+    await redisManager.del(lockKey);
   }
-  checkPendingTransactionsStatus = true;
+  
 }
 
 /**
@@ -278,7 +313,7 @@ async function runTradingBot() {
   
   setInterval(checkAndExecuteBuy, 1000 * 3); // 每10秒运行一次
   setInterval(checkAndExecuteSell, 1000 * 5); // 每10秒检查一次
-  setInterval(checkPendingTransactions, 1000 * 10); // 每30秒检查一次待处理交易
+  setInterval(checkPendingTransactions, 1000 * 10); // 每10秒检查一次待处理交易
   setInterval(cleanupOldData, 1000 * 60 * 10); // 每10分钟运行一次清理任务
 }
 
