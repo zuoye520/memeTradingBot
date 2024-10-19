@@ -41,14 +41,14 @@ async function checkAndExecuteBuy() {
     const popularTokens = await getPopularList({ 
       time: '1m', 
       limit: 20,
-      max_marketcap : 500000,//市值小于50万
+      max_marketcap : 1000000,//市值小于100万
       min_holder_count : 300,//持仓地址大于500
       min_created :'12h'//创建时间大于72小时24*3
     });
     // console.log('热门代币:', popularTokens);
     for (const token of popularTokens) {
-      //排除CTO未接管，1m/5m/1h 跌幅太多的标的
-      const condition = token.cto_flag === 0 || token.price_change_percent1m <= -5 || token.price_change_percent5m <= -10 || token.price_change_percent1h <= -30;
+      //排除CTO未接管，1m/5m/1h 涨跌幅太多的标的
+      const condition = token.cto_flag === 0 || token.price_change_percent1m <= -5 || token.price_change_percent5m <= -10 || token.price_change_percent1h <= -30 || token.price_change_percent1m >= 20 || token.price_change_percent5m >= 50 || token.price_change_percent1h >= 100;
       if(condition){
         console.log(`代币 ${token.symbol} ${token.address} 未接管，1m/5m/1h 跌幅太大，跳过`);
         continue;
@@ -276,7 +276,7 @@ async function runTradingBot() {
   console.log('启动 GMGN.ai 交易机器人...');
   await initDatabase(); // 初始化数据库
   
-  setInterval(checkAndExecuteBuy, 1000 * 5); // 每10秒运行一次
+  setInterval(checkAndExecuteBuy, 1000 * 3); // 每10秒运行一次
   setInterval(checkAndExecuteSell, 1000 * 5); // 每10秒检查一次
   setInterval(checkPendingTransactions, 1000 * 10); // 每30秒检查一次待处理交易
   setInterval(cleanupOldData, 1000 * 60 * 10); // 每10分钟运行一次清理任务
