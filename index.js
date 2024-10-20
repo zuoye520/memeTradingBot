@@ -46,7 +46,7 @@ async function checkAndExecuteBuy() {
       limit: 20,
       max_marketcap : 500000,//市值小于100万
       min_holder_count : 300,//持仓地址大于500
-      min_created :'12h'//创建时间大于12小时24*3
+      min_created :'48h'//创建时间大于48小时24*3
     });
     // console.log('热门代币:', popularTokens);
     for (const token of popularTokens) {
