@@ -51,7 +51,7 @@ async function checkAndExecuteBuy() {
     // console.log('热门代币:', popularTokens);
     for (const token of popularTokens) {
       //排除CTO未接管，1m/5m/1h 涨跌幅太多的标的
-      const condition = token.cto_flag === 0 || token.price_change_percent1m <= -5 || token.price_change_percent5m <= -10 || token.price_change_percent1h <= -30 || token.price_change_percent1m >= 20 || token.price_change_percent5m >= 50 || token.price_change_percent1h >= 100;
+      const condition = token.cto_flag === 0 || token.price_change_percent1m <= -5 || token.price_change_percent5m <= -10 || token.price_change_percent1h <= -30 || token.price_change_percent1m >= 20 || token.price_change_percent5m >= 40 || token.price_change_percent1h >= 80;
       if(condition){
         console.log(`代币 ${token.symbol} ${token.address} 未接管，1m/5m/1h 跌幅太大，跳过`);
         continue;
