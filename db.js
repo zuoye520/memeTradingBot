@@ -9,8 +9,8 @@ const pool = mysql.createPool({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
+  connectionLimit: 100,
+  queueLimit: 50
 });
 
 /**
@@ -114,12 +114,8 @@ async function deleteData(table, conditions) {
  * @param {number} days - 要删除的天数（从现在往前算）
  * @returns {Promise<Object>} - 删除的记录数
  */
-async function deleteOldData(days =3) {
-  
+async function deleteOldData(days = 2) {
   try {
-    // 开始事务
-    await pool.query('START TRANSACTION');
-
     // 删除旧的交易记录
     const [tradeResult] = await pool.query(`
       DELETE tr FROM trade_records tr
@@ -133,16 +129,11 @@ async function deleteOldData(days =3) {
       WHERE last_updated <= NOW() - INTERVAL ? DAY
     `, [days]);
 
-    // 提交事务
-    await pool.query('COMMIT');
-
     return {
       deletedTradeRecords: tradeResult.affectedRows,
       deletedTokens: tokenResult.affectedRows
     };
   } catch (error) {
-    // 如果出错，回滚事务
-    await pool.query('ROLLBACK');
     console.error('Error deleting old data:', error);
     throw error;
   }
