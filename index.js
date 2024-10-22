@@ -15,7 +15,7 @@ import {
   executeSolanaTrade,
   getTransactionStatus
 } from './api/apiService.js';
-import { sendTgMessage } from './messagePush.js';
+import { sendTgMessage } from './utils/messagePush.js';
 import { decryptPrivateKey } from './utils/keyManager.js';
 
 dotenv.config();
