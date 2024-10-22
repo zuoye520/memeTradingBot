@@ -16,25 +16,48 @@
 - 自动清理旧数据，保持数据库整洁
 - 使用 Redis 进行缓存和时间锁管理
 
+## 项目结构
+
+```
+meme-trading-bot/
+├── api/
+│   ├── apiService.js
+│   └── solanaTrading.js
+├── utils/
+│   ├── db.js
+│   ├── dbInit.js
+│   ├── httpUtils.js
+│   ├── keyManager.js
+│   ├── log.js
+│   ├── messagePush.js
+│   └── redisManager.js
+├── .env.example
+├── index.js
+├── package.json
+├── README.md
+└── start.js
+```
+
 ## 主要组件
 
 - `index.js`: 主程序文件，包含交易机器人的核心逻辑
-- `db.js`: 数据库连接和操作函数
-- `dbInit.js`: 数据库初始化和表创建
-- `apiService.js`: GMGN.ai API 服务封装
-- `httpUtils.js`: HTTP 请求工具函数
-- `solanaTrading.js`: Solana 交易相关函数
-- `messagePush.js`: 消息推送功能，包括 Telegram 通知
-- `keyManager.js`: 私钥加密和解密功能
+- `api/apiService.js`: GMGN.ai API 服务封装
+- `api/solanaTrading.js`: Solana 交易相关函数
+- `utils/db.js`: 数据库连接和操作函数
+- `utils/dbInit.js`: 数据库初始化和表创建
+- `utils/httpUtils.js`: HTTP 请求工具函数
+- `utils/keyManager.js`: 私钥加密和解密功能
+- `utils/log.js`: 日志记录功能
+- `utils/messagePush.js`: 消息推送功能，包括 Telegram 通知
+- `utils/redisManager.js`: Redis 缓存和时间锁管理
 - `start.js`: 启动脚本，处理密码输入并启动主程序
-- `redisManager.js`: Redis 缓存和时间锁管理
 
 ## 安装
 
 1. 克隆仓库：
    ```
-   git clone https://github.com/yourusername/memeTradingBot.git
-   cd memeTradingBot
+   git clone https://github.com/yourusername/meme-trading-bot.git
+   cd meme-trading-bot
    ```
 
 2. 安装依赖：
@@ -90,7 +113,7 @@ pm2 stop meme-trading-bot
 
 ### 买入策略
 - 检查 SOL 余额，确保有足够的资金进行交易
-- 获取符合条件的热门代币列表（市值小于 100 万，持仓地址大于 300，创建时间大于 6 小时）
+- 获取符合条件的热门代币列表（市值小于 100 万，持仓地址大于 300，创建时间大于 48 小时）
 - 排除未被 CTO 接管或短期内跌幅过大的代币
 - 对符合条件的代币执行买入操作
 
