@@ -1,4 +1,4 @@
-import { sendRequest } from './httpUtils.js';
+import { sendRequest } from '../utils/httpUtils.js';
 import dotenv from 'dotenv';
 import { executeSolanaSwap } from './solanaTrading.js';
 import { Connection, LAMPORTS_PER_SOL,PublicKey } from '@solana/web3.js';

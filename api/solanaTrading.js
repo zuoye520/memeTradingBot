@@ -1,7 +1,7 @@
 import { Wallet } from '@project-serum/anchor';
 import { Connection, Keypair, VersionedTransaction, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import bs58 from 'bs58';
-import { sendRequest } from './httpUtils.js';
+import { sendRequest } from '../utils/httpUtils.js';
 import dotenv from 'dotenv';
 
 dotenv.config();

@@ -1,4 +1,4 @@
-import { gmgnTokens } from './apiService.js';
+import { gmgnTokens } from '../api/apiService.js';
 import { sendRequest } from './httpUtils.js';
 import moment from 'moment';
 import dotenv from 'dotenv';
