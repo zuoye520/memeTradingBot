@@ -90,7 +90,8 @@ launchpad: ${tokenInfo.token.launchpad}\n
         text: text,
         replyMarkup: {
           inline_keyboard: [
-            [{ text: "🚀️冲啊🚀️", url: `https://gmgn.ai/sol/token/${tokenInfo.token.address}` }]
+            [{ text: "行情K线", url: `https://gmgn.ai/sol/token/${tokenInfo.token.address}` }],
+            [{ text: "交易记录", url: `https://gmgn.ai/sol/address/${sniperAddress}` }]
           ]
         },
         mode: "HTML"
