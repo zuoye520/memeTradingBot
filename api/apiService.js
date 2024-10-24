@@ -117,6 +117,32 @@ async function getSolanaBalance(walletAddress) {
   }
 }
 
+/**
+ * 获取token 余额
+ * @returns {Object} balance {
+  amount: '45539516',
+  decimals: 9,
+  uiAmount: 0.045539516,
+  uiAmountString: '0.045539516'
+}
+ */
+async function getSolanaTokenBalance(walletAddress,tokenAddress) {
+  // 创建账户和 Token 的 PublicKey 对象
+  const accountKey = new PublicKey(walletAddress);
+  const tokenMintKey = new PublicKey(tokenAddress);
+
+  // 查询账户的 token 余额
+  const connection = new Connection(process.env.SOLANA_RPC_URL, 'confirmed');
+  const tokenAccountInfo = await connection.getParsedTokenAccountsByOwner(accountKey, { mint: tokenMintKey });
+  if (!tokenAccountInfo || tokenAccountInfo.value.length === 0) {
+      throw new Error('Token account not found');
+  }
+  console.log('tokenAmount:',tokenAccountInfo.value[0].account.data.parsed.info.tokenAmount)
+  // 提取并返回余额
+  const tokenAmount = tokenAccountInfo.value[0].account.data.parsed.info.tokenAmount;
+  return tokenAmount;
+}
+
 async function getTransactionStatus(hash,lastValidBlockHeight) {
   const statusUrl = `${GMGN_API_URL}/defi/router/v1/sol/tx/get_transaction_status?hash=${hash}&last_valid_height=${lastValidBlockHeight}`;
   const status = await sendRequest(statusUrl, { method: 'get' });
@@ -128,6 +154,7 @@ async function getTransactionStatus(hash,lastValidBlockHeight) {
 
 export {
   getSolanaBalance,
+  getSolanaTokenBalance,
   getPopularList,
   getWalletHoldings,
   gmgnTokens,

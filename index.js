@@ -10,6 +10,7 @@ import log from './utils/log.js';
 
 import {
   getSolanaBalance,
+  getSolanaTokenBalance,
   getPopularList,
   getWalletHoldings,
   executeSolanaTrade,
@@ -181,6 +182,12 @@ async function checkAndExecuteSell() {
         const symbol = holding.symbol;
         const address = holding.token_address
         const decimals = holding.decimals;
+        // 检查余额是否足够
+        const {uiAmount} = await getSolanaTokenBalance(walletAddress,address);
+        if(uiAmount <= 0) {
+          log.info(`${symbol} ${address} 余额不足,不执行卖出`);
+          continue;
+        }
         const tradeData = {
           swapMode: 'ExactOut',//TOKEN->SOL
           inputToken: address,//TOKEN
