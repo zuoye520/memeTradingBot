@@ -152,6 +152,51 @@ async function getTransactionStatus(hash,lastValidBlockHeight) {
   return 'undone';
 }
 
+/**
+ * daos.fun api
+ * @returns {Array}
+ */
+async function getDaosFunList() {
+  try {
+    // 构建 API 请求 URL
+    const url = `https://www.daos.fun/api/trpc/banner_events.list,daos?batch=1`;
+    console.log('getDaosFunList:',url)
+    const response = await sendRequest(url, { method: 'get' });
+    if (!Array.isArray(response)) throw response;
+    return response;
+  } catch (error) {
+    console.error('getDaosFunList Error:', error);
+    throw error;
+  }
+}
+/**
+ * tiptag api
+ * https://eth-api.tiptag.social/community/communitiesByNew eth
+ * https://enuls-api.tiptag.social/community/communitiesByNew enuls
+ * https://api.tiptag.social/community/communitiesByNew base
+ * @returns {Array}
+ */
+async function getTipTagNewList(chain = 'base') {
+  try {
+    // 构建 API 请求 URL
+    let url = `https://api.tiptag.social/community/communitiesByNew`; 
+    if(chain === 'eth'){
+      url = `https://eth-api.tiptag.social/community/communitiesByNew`
+    }else if(chain === 'enuls'){
+      url = `https://enuls-api.tiptag.social/community/communitiesByNew`
+    }
+    console.log('getTipTagNewList:',url)
+    const response = await sendRequest(url, { method: 'get' });
+    if (!Array.isArray(response)) throw response;
+    return response;
+  } catch (error) {
+    console.error('getTipTagNewList Error:', error);
+    throw error;
+  }
+}
+
+
+
 export {
   getSolanaBalance,
   getSolanaTokenBalance,
@@ -159,5 +204,7 @@ export {
   getWalletHoldings,
   gmgnTokens,
   executeSolanaTrade,
-  getTransactionStatus
+  getTransactionStatus,
+  getDaosFunList,
+  getTipTagNewList
 };

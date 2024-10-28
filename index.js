@@ -18,6 +18,9 @@ import {
 } from './api/apiService.js';
 import { sendTgMessage } from './utils/messagePush.js';
 import { decryptPrivateKey } from './utils/keyManager.js';
+//监控
+import { monitorDaosFun } from './monitor/daosfun.js';
+import { monitorTipTag } from './monitor/tiptag.js';
 
 dotenv.config();
 const sleep = (seconds) => {
@@ -323,12 +326,16 @@ async function cleanupOldData() {
 async function runTradingBot() {
   try {
     log.info('启动 GMGN.ai 交易机器人...');
-    await initDatabase(); // 初始化数据库
+    // await initDatabase(); // 初始化数据库
     
-    setInterval(checkAndExecuteBuy, 1000 * 3); // 每10秒运行一次
-    setInterval(checkAndExecuteSell, 1000 * 5); // 每10秒检查一次
-    setInterval(checkPendingTransactions, 1000 * 10); // 每10秒检查一次待处理交易
-    setInterval(cleanupOldData, 1000 * 60 * 10); // 每10分钟运行一次清理任务
+    // setInterval(checkAndExecuteBuy, 1000 * 3); // 每10秒运行一次
+    // setInterval(checkAndExecuteSell, 1000 * 5); // 每10秒检查一次
+    // setInterval(checkPendingTransactions, 1000 * 10); // 每10秒检查一次待处理交易
+    // setInterval(cleanupOldData, 1000 * 60 * 10); // 每10分钟运行一次清理任务
+
+    setInterval(monitorDaosFun, 1000 * 10); // 每10秒运行一次任务
+    setInterval(monitorTipTag, 1000 * 10); // 每10秒运行一次任务
+    
   } catch (error) {
     log.error('定时任务运行失败:', error);
   }

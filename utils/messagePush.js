@@ -102,4 +102,26 @@ launchpad: ${tokenInfo.token.launchpad}\n
   }
 }
 
-export { sendTgMessage };
+async function sendTgCustomMessage(params = {}) {
+  try {
+    const { message,inlineKeyboard = [] } = params;
+    chatIds.forEach((chatId) => {
+      const time = moment().format("YYYY/MM/DD HH:mm:ss");
+      let text = `${message}\n播报时间: ${time}`;
+
+      sendMessage({
+        TOKEN: TG_BOT_TOKEN,
+        chatId: chatId,
+        text: text,
+        replyMarkup: {
+          inline_keyboard:inlineKeyboard
+        },
+        mode: "HTML"
+      });
+    });
+  } catch (error) {
+    console.error('推送消息失败:', error);
+  }
+}
+
+export { sendTgMessage,sendTgCustomMessage };
