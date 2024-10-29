@@ -333,7 +333,7 @@ async function runTradingBot() {
     setInterval(checkPendingTransactions, 1000 * 10); // 每10秒检查一次待处理交易
     setInterval(cleanupOldData, 1000 * 60 * 10); // 每10分钟运行一次清理任务
     //监控定时任务
-    setInterval(monitorDaosFun, 1000 * 10); // 每10秒运行一次任务
+    // setInterval(monitorDaosFun, 1000 * 10); // 每10秒运行一次任务
     setInterval(monitorTipTag, 1000 * 10); // 每10秒运行一次任务
     
   } catch (error) {
