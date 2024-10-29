@@ -1,6 +1,7 @@
 import { gmgnTokens } from '../api/apiService.js';
 import { sendRequest } from './httpUtils.js';
 import moment from 'moment';
+import redisManager from '../utils/redisManager.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -104,7 +105,14 @@ launchpad: ${tokenInfo.token.launchpad}\n
 
 async function sendTgCustomMessage(params = {}) {
   try {
-    const { message,inlineKeyboard = [] } = params;
+    const { message,inlineKeyboard = [],lockKey, timer } = params;
+    if(lockKey && timer){//通知消息锁
+      const lockSet = await redisManager.setTimeLock(lockKey, timer);
+      if (!lockSet) {
+        console.log('锁已存在，发送消息被阻止');
+        return;
+      }
+    }
     chatIds.forEach((chatId) => {
       const time = moment().format("YYYY/MM/DD HH:mm:ss");
       let text = `${message}\n播报时间: ${time}`;

@@ -4,27 +4,28 @@ import {
   getDaosFunList
 } from '../api/apiService.js';
 
-let daosCount = 0;
+let daos = null;
 async function monitorDaosFun(){
   try {
     const list = await getDaosFunList()
-    if( daosCount === 0){
-      daosCount = list[1].result.data.length
+    if(!daos){
+      daos = list[1].result.data.daos[0].dao_mint
     }else{
-      if(daosCount !== list[1].result.data.length){
+      if(daos !== list[1].result.data.daos[0].dao_mint){
         sendTgCustomMessage({
-          message: `<strong>监控通知</strong>\n监控平台：DAOS.FUN\n描述：疑是有新基金发布\n当前基金数量：${list[1].result.data.length}`
+          message: `<strong>监控通知</strong>\n监控平台：DAOS.FUN\n描述：疑是有新基金发布\n最新基金DAO地址：${list[1].result.data.daos[0].dao_mint}`
         })
       }else{
-        log.info(`DAOS FUN 当前基金数量：${list[1].result.data.length}`)
+        log.info(`DAOS FUN 当前最新基金DAO地址：${list[1].result.data.daos[0].dao_mint}`)
       }
-      daosCount = list[1].result.data.length
-
+      daos = list[1].result.data.daos[0].dao_mint
     }
   } catch (error) {
     log.error('DAOSFUN 监控出现异常:',error)
     sendTgCustomMessage({
-      message: `DAOSFUN 监控出现异常`
+      message: `DAOSFUN 监控出现异常`,
+      lockKey:'daos_fun_error_lock', 
+      timer: 60*30 // 30分钟
     })
   }
   

@@ -159,9 +159,10 @@ async function getTransactionStatus(hash,lastValidBlockHeight) {
 async function getDaosFunList() {
   try {
     // 构建 API 请求 URL
-    const url = `https://www.daos.fun/api/trpc/banner_events.list,daos?batch=1`;
+    const url = `https://www.daos.fun/api/trpc/banner_events.list,daos?batch=1&input=%7B%221%22%3A%7B%22page_number%22%3A1%7D%7D`;
     console.log('getDaosFunList:',url)
     const response = await sendRequest(url, { method: 'get' });
+    // console.log('response:',response)
     if (!Array.isArray(response)) throw response;
     return response;
   } catch (error) {
