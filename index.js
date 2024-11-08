@@ -204,7 +204,7 @@ async function checkAndExecuteSell() {
           swapMode: 'ExactOut',//TOKEN->SOL
           inputToken: address,//TOKEN
           outputToken: process.env.SOL_ADDRESS,//SOL
-          amount: process.env.DEFAUT_SWAP =='GMGN' ? (sellAmount * Math.pow(10, decimals)).toFixed(0) * 1 : sellAmount.toFixed(0)*1,
+          amount: process.env.DEFAUT_SWAP =='GMGN' ? (sellAmount * Math.pow(10, decimals)).toFixed(0) * 1 : sellAmount*1,
           slippage: process.env.SOL_SLIPPAGE,
           fee: process.env.SOL_PRIORITY_FEE
         };
