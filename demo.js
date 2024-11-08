@@ -375,9 +375,8 @@ async function runTradingBot() {
     // //监控定时任务
     // setInterval(monitorDaosFun, 1000 * 10); // 每10秒运行一次任务
     // setInterval(monitorTipTag, 1000 * 10); // 每10秒运行一次任务
-    // const address = 'EsNwBBJS7yR5ieUfsL5YrEFoVTmvL1Jk9MqcXxqEpump',
-    //   decimals = 6,
-    //   amount = 270;
+    const address = 'EsNwBBJS7yR5ieUfsL5YrEFoVTmvL1Jk9MqcXxqEpump',
+      amount = 30;
     // const tradeData = {
     //   swapMode: 'ExactIn',//TOKEN->SOL
     //   inputToken: process.env.SOL_ADDRESS,//TOKEN
@@ -388,7 +387,7 @@ async function runTradingBot() {
     //   fee: process.env.SOL_PRIORITY_FEE
     // };
     // const tradeData = {
-    //   swapMode: 'ExactOut',//TOKEN->SOL
+    //   swapMode: 'ExactIn',//TOKEN->SOL
     //   inputToken: address,//TOKEN
     //   outputToken: process.env.SOL_ADDRESS,//SOL
     //   // amount: (sellAmount * Math.pow(10, decimals)).toFixed(0) * 1,

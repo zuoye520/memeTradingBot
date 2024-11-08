@@ -69,18 +69,16 @@ import {
       throw new Error('Transaction confirmation timeout')
     }
     async loadPoolKeys() {
-      
+      this.allPoolKeysJson = []
+      return;
+      //下面代码有性能问题,直接卡死求
       try {
         if (existsSync('pools.json')) {
-          console.log('pools',1)
-          // this.allPoolKeysJson = JSON.parse((await readFile('pools.json')).toString())
-          this.allPoolKeysJson = JSON.parse(await readFile('pools.json'))
-          console.log('pools',2)
+          this.allPoolKeysJson = JSON.parse((await readFile('pools.json')).toString())
           return;
         }
         throw new Error('no file found')
       } catch (error) {
-        return;
         const liquidityJsonResp = await fetch('https://api.raydium.io/v2/sdk/liquidity/mainnet.json')
         if (!liquidityJsonResp.ok) return []
         const liquidityJson = await liquidityJsonResp.json()

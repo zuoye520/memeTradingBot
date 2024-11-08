@@ -138,7 +138,7 @@ async function executeRaydiumSwap(tradeParams) {
       poolInfo,
       priorityFee * LAMPORTS_PER_SOL, // Prioritization fee, now set to (0.0005 SOL)
       useVersionedTransaction,
-      side,// "in" | "out"
+      'in',// "in" | "out" 这里如果是out 则baseMint amount不是固定值
       slippage // Slippage
     )
     let lastValidBlockHeight,
