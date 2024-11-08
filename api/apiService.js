@@ -1,6 +1,7 @@
 import { sendRequest } from '../utils/httpUtils.js';
 import dotenv from 'dotenv';
 import { executeSolanaSwap } from './solanaTrading.js';
+import RaydiumSwap from './RaydiumSwap.js'
 import { transferSPLToken, checkSPLTokenAccount } from './solanaTransfer.js';
 import { Connection, LAMPORTS_PER_SOL,PublicKey } from '@solana/web3.js';
 dotenv.config();
@@ -90,6 +91,11 @@ async function getWalletHoldings(walletAddress) {
   }
 }
 
+/**
+ * gmgn swap API
+ * @param {*} tradeParams 
+ * @returns 
+ */
 async function executeSolanaTrade(tradeParams) {
   const { inputToken, outputToken, amount, slippage, swapMode, fee} = tradeParams;
   try {
@@ -99,6 +105,68 @@ async function executeSolanaTrade(tradeParams) {
     console.error('Error executing Solana trade:', error);
     throw error;
   }
+}
+
+/**
+ * Raydium Swap
+ * @param {*} tradeParams 
+ * @returns 
+ */
+async function executeRaydiumSwap(tradeParams) {
+  const { inputToken:baseMint, outputToken:quoteMint, amount, slippage = 10, swapMode, fee:priorityFee, useVersionedTransaction = true} = tradeParams;
+  try {
+
+    const raydiumSwap = new RaydiumSwap(process.env.SOLANA_RPC_URL, process.env.SOL_PRIVATE_KEY)
+    console.log(`Raydium swap initialized`)
+
+    // Loading with pool keys from https://api.raydium.io/v2/sdk/liquidity/mainnet.json
+    await raydiumSwap.loadPoolKeys()
+    console.log(`Loaded pool keys`)
+
+    // Trying to find pool info in the json we loaded earlier and by comparing baseMint and tokenBAddress
+    let poolInfo = raydiumSwap.findPoolInfoForTokens(baseMint, quoteMint)
+
+    if (!poolInfo) poolInfo = await raydiumSwap.findRaydiumPoolInfo(baseMint, quoteMint)
+
+    if (!poolInfo) {
+      throw new Error("Couldn't find the pool info")
+    }
+    const side = swapMode =='ExactIn'? 'in':'out' 
+    const tx = await raydiumSwap.getSwapTransaction(
+      quoteMint,
+      amount,
+      poolInfo,
+      priorityFee * LAMPORTS_PER_SOL, // Prioritization fee, now set to (0.0005 SOL)
+      useVersionedTransaction,
+      side,// "in" | "out"
+      slippage // Slippage
+    )
+    let lastValidBlockHeight,
+        txid;
+    if (useVersionedTransaction) {
+      txid = await raydiumSwap.sendVersionedTransaction(tx)
+      const { lastValidBlockHeight: blockHeight } = await raydiumSwap.connection.getLatestBlockhash()
+      lastValidBlockHeight = blockHeight
+    } else {
+        txid = await raydiumSwap.sendLegacyTransaction(tx)
+        lastValidBlockHeight = tx.lastValidBlockHeight
+    }
+    console.log(`Transaction sent: https://solscan.io/tx/${txid}`)
+    return {data:{hash:txid,lastValidBlockHeight}}
+
+  } catch (error) {
+    console.error('Error executing Solana trade:', error);
+    throw error;
+  }
+}
+async function fetchPoolKeys() {
+  const raydiumSwap = new RaydiumSwap(process.env.SOLANA_RPC_URL, process.env.SOL_PRIVATE_KEY)
+    console.log(`Raydium swap initialized`)
+
+    // Loading with pool keys from https://api.raydium.io/v2/sdk/liquidity/mainnet.json
+    await raydiumSwap.loadPoolKeys()
+    console.log(`Loaded pool keys`)
+    return true;
 }
 
 /**
@@ -208,6 +276,8 @@ export {
   getWalletHoldings,
   gmgnTokens,
   executeSolanaTrade,
+  executeRaydiumSwap,
+  fetchPoolKeys,
   getTransactionStatus,
   getDaosFunList,
   getTipTagNewList

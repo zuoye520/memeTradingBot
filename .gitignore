@@ -36,3 +36,5 @@ pids
 
 # Windows
 Thumbs.db
+# raydium pools
+pools.json

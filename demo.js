@@ -16,7 +16,6 @@ import {
   getWalletHoldings,
   executeSolanaTrade,
   executeRaydiumSwap,
-  fetchPoolKeys,
   getTransactionStatus
 } from './api/apiService.js';
 
@@ -84,14 +83,12 @@ async function checkAndExecuteBuy() {
           swapMode: 'ExactIn',//SOL->TOKEN
           inputToken: process.env.SOL_ADDRESS,
           outputToken: token.address,
-          amount:process.env.DEFAUT_SWAP =='GMGN' ? process.env.SOL_TRADE_AMOUNT * 1e9 : process.env.SOL_TRADE_AMOUNT * 1,//SOL 精度 9
+          amount: process.env.SOL_TRADE_AMOUNT * 1e9,//SOL 精度 9
           slippage: process.env.SOL_SLIPPAGE,
           fee: process.env.SOL_PRIORITY_FEE
         };
         try {
-          const tradeResult =process.env.DEFAUT_SWAP =='GMGN' ? await executeSolanaTrade(tradeData) :await executeRaydiumSwap(tradeData);
-
-
+          const tradeResult = await executeSolanaTrade(tradeData);
           log.info(`已为代币 ${token.symbol} 执行交易，结果:`, tradeResult);
           if(!tradeResult || !tradeResult.data || !tradeResult.data.hash) {
             log.info(`交易失败，交易结果:`, tradeResult);
@@ -125,9 +122,6 @@ async function checkAndExecuteBuy() {
           });
         } catch (tradeError) {
           log.error(`为代币 ${token.symbol} 执行交易失败:`, tradeError);
-          sendTgCustomMessage({
-            message: `<strong>监控通知</strong>\n描述：执行交易失败\nTOKEN地址：${token.address}\n错误信息：${tradeError}`
-          })
         }
         // 6. 推送消息
         sendTgMessage({
@@ -204,7 +198,7 @@ async function checkAndExecuteSell() {
           swapMode: 'ExactOut',//TOKEN->SOL
           inputToken: address,//TOKEN
           outputToken: process.env.SOL_ADDRESS,//SOL
-          amount: process.env.DEFAUT_SWAP =='GMGN' ? (sellAmount * Math.pow(10, decimals)).toFixed(0) * 1 : sellAmount.toFixed(0)*1,
+          amount: (sellAmount * Math.pow(10, decimals)).toFixed(0) * 1,
           slippage: process.env.SOL_SLIPPAGE,
           fee: process.env.SOL_PRIORITY_FEE
         };
@@ -220,7 +214,7 @@ async function checkAndExecuteSell() {
               continue; 
             }
             //执行交易
-            const tradeResult = process.env.DEFAUT_SWAP =='GMGN' ? await executeSolanaTrade(tradeData) :await executeRaydiumSwap(tradeData);
+            const tradeResult = await executeSolanaTrade(tradeData);
             log.info(`已为代币 ${symbol} 执行卖出，结果:`, tradeResult);
             if(!tradeResult.data.hash) {
               log.info(`交易失败，交易结果:`, tradeResult);
@@ -258,10 +252,7 @@ async function checkAndExecuteSell() {
             });
           }
         } catch (tradeError) {
-          log.error(`为代币 ${symbol} 执行卖出失败:`, tradeError);
-          sendTgCustomMessage({
-            message: `<strong>监控通知</strong>\n描述：执行交易失败\nTOKEN地址：${address}\n错误信息：${tradeError}`
-          })
+          log.error(`为代币 ${holding.symbol} 执行卖出失败:`, tradeError);
         }
       }
     }
@@ -375,16 +366,45 @@ async function cleanupOldData() {
 async function runTradingBot() {
   try {
     log.info('启动 GMGN.ai 交易机器人...');
-    await initDatabase(); // 初始化数据库
-    await fetchPoolKeys(); //拉取Raydium pools
-    // meme交易定时任务
-    setInterval(checkAndExecuteBuy, 1000 * 3); // 每10秒运行一次
-    setInterval(checkAndExecuteSell, 1000 * 5); // 每10秒检查一次
-    setInterval(checkPendingTransactions, 1000 * 10); // 每10秒检查一次待处理交易
-    setInterval(cleanupOldData, 1000 * 60 * 10); // 每10分钟运行一次清理任务
-    //监控定时任务
-    setInterval(monitorDaosFun, 1000 * 10); // 每10秒运行一次任务
-    setInterval(monitorTipTag, 1000 * 10); // 每10秒运行一次任务
+    // await initDatabase(); // 初始化数据库
+    // // meme交易定时任务
+    // setInterval(checkAndExecuteBuy, 1000 * 3); // 每10秒运行一次
+    // setInterval(checkAndExecuteSell, 1000 * 5); // 每10秒检查一次
+    // setInterval(checkPendingTransactions, 1000 * 10); // 每10秒检查一次待处理交易
+    // setInterval(cleanupOldData, 1000 * 60 * 10); // 每10分钟运行一次清理任务
+    // //监控定时任务
+    // setInterval(monitorDaosFun, 1000 * 10); // 每10秒运行一次任务
+    // setInterval(monitorTipTag, 1000 * 10); // 每10秒运行一次任务
+    // const address = 'EsNwBBJS7yR5ieUfsL5YrEFoVTmvL1Jk9MqcXxqEpump',
+    //   decimals = 6,
+    //   amount = 270;
+    // const tradeData = {
+    //   swapMode: 'ExactIn',//TOKEN->SOL
+    //   inputToken: process.env.SOL_ADDRESS,//TOKEN
+    //   outputToken: address,//SOL
+    //   // amount: (sellAmount * Math.pow(10, decimals)).toFixed(0) * 1,
+    //   amount:amount,
+    //   slippage: process.env.SOL_SLIPPAGE,
+    //   fee: process.env.SOL_PRIORITY_FEE
+    // };
+    // const tradeData = {
+    //   swapMode: 'ExactOut',//TOKEN->SOL
+    //   inputToken: address,//TOKEN
+    //   outputToken: process.env.SOL_ADDRESS,//SOL
+    //   // amount: (sellAmount * Math.pow(10, decimals)).toFixed(0) * 1,
+    //   amount:amount,
+    //   slippage: process.env.SOL_SLIPPAGE,
+    //   fee: process.env.SOL_PRIORITY_FEE
+    // };
+    // const tradeResult = await executeRaydiumSwap(tradeData)
+    // console.log('tradeResult:',tradeResult)
+    // const tradeResult = {
+    //   data: {
+    //     hash: '2ckjLLgQ1BVJ6Vd62c2w3NcLj8z37EZdQM4P8zzHuesfSjA4wJyW8VHvbPaJdEGSu3TE63jWV8gQBA65gzKuReSe',
+    //     lastValidBlockHeight: 278708553
+    //   }
+    // }
+    // const status = await getTransactionStatus(tradeResult.data.hash, tradeResult.data.lastValidBlockHeight);
   } catch (error) {
     log.error('定时任务运行失败:', error);
   }
