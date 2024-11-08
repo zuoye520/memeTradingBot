@@ -361,16 +361,16 @@ async function cleanupOldData() {
  */
 async function runTradingBot() {
   try {
-    // log.info('启动 GMGN.ai 交易机器人...');
-    // await initDatabase(); // 初始化数据库
-    // // meme交易定时任务
-    // setInterval(checkAndExecuteBuy, 1000 * 3); // 每10秒运行一次
-    // setInterval(checkAndExecuteSell, 1000 * 5); // 每10秒检查一次
-    // setInterval(checkPendingTransactions, 1000 * 10); // 每10秒检查一次待处理交易
-    // setInterval(cleanupOldData, 1000 * 60 * 10); // 每10分钟运行一次清理任务
-    // //监控定时任务
-    // setInterval(monitorDaosFun, 1000 * 10); // 每10秒运行一次任务
-    // setInterval(monitorTipTag, 1000 * 10); // 每10秒运行一次任务
+    log.info('启动 GMGN.ai 交易机器人...');
+    await initDatabase(); // 初始化数据库
+    // meme交易定时任务
+    setInterval(checkAndExecuteBuy, 1000 * 3); // 每10秒运行一次
+    setInterval(checkAndExecuteSell, 1000 * 5); // 每10秒检查一次
+    setInterval(checkPendingTransactions, 1000 * 10); // 每10秒检查一次待处理交易
+    setInterval(cleanupOldData, 1000 * 60 * 10); // 每10分钟运行一次清理任务
+    //监控定时任务
+    setInterval(monitorDaosFun, 1000 * 10); // 每10秒运行一次任务
+    setInterval(monitorTipTag, 1000 * 10); // 每10秒运行一次任务
   } catch (error) {
     log.error('定时任务运行失败:', error);
   }
