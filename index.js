@@ -126,7 +126,7 @@ async function checkAndExecuteBuy() {
         } catch (tradeError) {
           log.error(`为代币 ${token.symbol} 执行交易失败:`, tradeError);
           sendTgCustomMessage({
-            message: `<strong>监控通知</strong>\n描述：执行交易失败\nTOKEN地址：${token.address}\n错误信息：${tradeError}`
+            message: `<strong>监控通知</strong>\n描述：执行交易失败,${token.symbol}\nTOKEN地址：${token.address}\n错误信息：${tradeError}`
           })
         }
         // 6. 推送消息
@@ -259,9 +259,11 @@ async function checkAndExecuteSell() {
           }
         } catch (tradeError) {
           log.error(`为代币 ${symbol} 执行卖出失败:`, tradeError);
-          sendTgCustomMessage({
-            message: `<strong>监控通知</strong>\n描述：执行交易失败\nTOKEN地址：${address}\n错误信息：${tradeError}`
-          })
+          if(JSON.stringify(tradeError).indexOf('amounts must greater than zero') < 0){
+            sendTgCustomMessage({
+              message: `<strong>监控通知</strong>\n描述：执行交易失败,${symbol}\nTOKEN地址：${address}\n错误信息：${tradeError}`
+            })
+          }
         }
       }
     }
