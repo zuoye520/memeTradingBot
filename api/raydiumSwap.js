@@ -69,12 +69,13 @@ import {
       throw new Error('Transaction confirmation timeout')
     }
     async loadPoolKeys() {
-      console.log('existsSync:',existsSync('pools.json'))
-      return;
+      
       try {
         if (existsSync('pools.json')) {
+          console.log('existsSync:',1)
           this.allPoolKeysJson = JSON.parse((await readFile('pools.json')).toString())
-          return
+          console.log('existsSync:',2)
+          return;
         }
         throw new Error('no file found')
       } catch (error) {
