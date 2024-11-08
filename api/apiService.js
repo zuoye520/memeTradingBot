@@ -1,7 +1,7 @@
 import { sendRequest } from '../utils/httpUtils.js';
 import dotenv from 'dotenv';
 import { executeSolanaSwap } from './solanaTrading.js';
-import RaydiumSwap from './RaydiumSwap.js'
+import RaydiumSwap from './raydiumSwap.js'
 import { transferSPLToken, checkSPLTokenAccount } from './solanaTransfer.js';
 import { Connection, LAMPORTS_PER_SOL,PublicKey } from '@solana/web3.js';
 dotenv.config();
