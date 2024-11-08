@@ -69,12 +69,13 @@ import {
       throw new Error('Transaction confirmation timeout')
     }
     async loadPoolKeys() {
+      console.log('existsSync:',existsSync('pools.json'))
+      return;
       try {
         if (existsSync('pools.json')) {
           this.allPoolKeysJson = JSON.parse((await readFile('pools.json')).toString())
           return
         }
-  
         throw new Error('no file found')
       } catch (error) {
         const liquidityJsonResp = await fetch('https://api.raydium.io/v2/sdk/liquidity/mainnet.json')
