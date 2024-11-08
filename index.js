@@ -376,7 +376,7 @@ async function runTradingBot() {
   try {
     log.info('启动 GMGN.ai 交易机器人...');
     await initDatabase(); // 初始化数据库
-    await fetchPoolKeys(); //拉取Raydium pools
+    // await fetchPoolKeys(); //拉取Raydium pools
     // meme交易定时任务
     setInterval(checkAndExecuteBuy, 1000 * 3); // 每10秒运行一次
     setInterval(checkAndExecuteSell, 1000 * 5); // 每10秒检查一次
