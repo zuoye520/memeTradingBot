@@ -9,6 +9,7 @@ import { initDatabase } from './utils/dbInit.js';
 import log from './utils/log.js';
 
 import {
+  transferSPLToken,
   getSolanaBalance,
   getSolanaTokenBalance,
   getPopularList,
@@ -16,7 +17,8 @@ import {
   executeSolanaTrade,
   getTransactionStatus
 } from './api/apiService.js';
-import { sendTgMessage } from './utils/messagePush.js';
+
+import { sendTgMessage,sendTgCustomMessage } from './utils/messagePush.js';
 import { decryptPrivateKey } from './utils/keyManager.js';
 //监控
 import { monitorDaosFun } from './monitor/daosfun.js';
@@ -284,12 +286,18 @@ async function checkPendingTransactions() {
         // 交易已确认，更新状态为 COMPLETED
         await updateData('trade_records', { status: 'COMPLETED' }, { id: transaction.id });
         log.info(`Transaction ${transaction.hash} completed`);
+        // 买入操作时, 转账spl token 10%到领一个账户
+        
+        
+        if(transaction.out_token != process.env.SOL_ADDRESS){
+          await executeTransferSPLToken(transaction.out_token)
+        }
       } else if (status === 'failed') {
         // 交易失败或过期，更新状态为 FAILED
         await updateData('trade_records', { status: 'FAILED' }, { id: transaction.id });
         log.info(`Transaction ${transaction.hash} failed`);
         //交易失败,删除缓存时间锁(买单才删除)
-        if(transaction.out_token != 'So11111111111111111111111111111111111111112'){
+        if(transaction.out_token != process.env.SOL_ADDRESS){
           await redisManager.del(transaction.out_token);
         }
       }
@@ -303,6 +311,34 @@ async function checkPendingTransactions() {
     await redisManager.del(lockKey);
   }
   
+}
+/**
+ * 转账，转账失败重试3次
+ * @param {*} tokenMintAddress 
+ * @returns 
+ */
+async function executeTransferSPLToken(tokenMintAddress) {
+  const MAX_RETRIES = 3;
+  let attempts = 0;
+  while (attempts < MAX_RETRIES) {
+    try {
+      //获取spl token 余额及精度
+      const walletAddress = process.env.SOL_WALLET_ADDRESS
+      const {decimals,uiAmount} = await getSolanaTokenBalance(walletAddress,tokenMintAddress);
+      //执行转账
+      const recipientAddress = process.env.SPL_WALLET_ADDRESS;
+      const amount = (uiAmount * 0.1).toFixed(0) * 1;//转账10%
+      await transferSPLToken(recipientAddress, tokenMintAddress, amount, decimals);
+      attempts = MAX_RETRIES;
+    } catch (error) {
+      attempts++;
+      // 5. 推送消息
+      sendTgCustomMessage({
+        message: `<strong>监控通知</strong>\n描述：转账失败\nTOKEN地址：${tokenMintAddress}\n错误信息：${error}`
+      })
+    }
+  }
+  return attempts;
 }
 
 /**
@@ -325,17 +361,16 @@ async function cleanupOldData() {
  */
 async function runTradingBot() {
   try {
-    log.info('启动 GMGN.ai 交易机器人...');
-    await initDatabase(); // 初始化数据库
-    // meme交易定时任务
-    setInterval(checkAndExecuteBuy, 1000 * 3); // 每10秒运行一次
-    setInterval(checkAndExecuteSell, 1000 * 5); // 每10秒检查一次
-    setInterval(checkPendingTransactions, 1000 * 10); // 每10秒检查一次待处理交易
-    setInterval(cleanupOldData, 1000 * 60 * 10); // 每10分钟运行一次清理任务
-    //监控定时任务
-    setInterval(monitorDaosFun, 1000 * 10); // 每10秒运行一次任务
-    setInterval(monitorTipTag, 1000 * 10); // 每10秒运行一次任务
-    
+    // log.info('启动 GMGN.ai 交易机器人...');
+    // await initDatabase(); // 初始化数据库
+    // // meme交易定时任务
+    // setInterval(checkAndExecuteBuy, 1000 * 3); // 每10秒运行一次
+    // setInterval(checkAndExecuteSell, 1000 * 5); // 每10秒检查一次
+    // setInterval(checkPendingTransactions, 1000 * 10); // 每10秒检查一次待处理交易
+    // setInterval(cleanupOldData, 1000 * 60 * 10); // 每10分钟运行一次清理任务
+    // //监控定时任务
+    // setInterval(monitorDaosFun, 1000 * 10); // 每10秒运行一次任务
+    // setInterval(monitorTipTag, 1000 * 10); // 每10秒运行一次任务
   } catch (error) {
     log.error('定时任务运行失败:', error);
   }
