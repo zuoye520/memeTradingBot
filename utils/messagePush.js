@@ -32,17 +32,24 @@ async function sendMessage(params) {
     parse_mode: mode,
     reply_markup: JSON.stringify(replyMarkup)
   };
-
-  try {
-    const result = await sendRequest(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      data: data
-    });
-    console.log('Telegram 消息发送成功:', result);
-  } catch (error) {
-    console.error('Telegram 消息发送失败:', error);
+  const MAX_RETRIES = 3;
+  let attempts = 0;
+  while (attempts < MAX_RETRIES) {
+    try {
+      const result = await sendRequest(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        data: data
+      });
+      console.log('Telegram 消息发送成功:', result);
+      attempts = MAX_RETRIES;
+    } catch (error) {
+      console.error('Telegram 消息发送失败:', error);
+      attempts++;
+    }
   }
+  return attempts;
+  
 }
 
 /**

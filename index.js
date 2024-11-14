@@ -342,15 +342,15 @@ async function executeTransferSPLToken(tokenMintAddress) {
       const amount = (uiAmount * 0.1).toFixed(0) * 1;//转账10%
       await transferSPLToken(recipientAddress, tokenMintAddress, amount, decimals);
       attempts = MAX_RETRIES;
-      sendTgCustomMessage({
-        message: `<strong>监控通知</strong>\n描述：转账成功\nTOKEN地址：${tokenMintAddress}`
-      })
+      // sendTgCustomMessage({
+      //   message: `<strong>监控通知</strong>\n描述：转账成功\nTOKEN地址：${tokenMintAddress}`
+      // })
     } catch (error) {
       attempts++;
       // 5. 推送消息
-      sendTgCustomMessage({
-        message: `<strong>监控通知</strong>\n描述：转账失败\nTOKEN地址：${tokenMintAddress}\n错误信息：${error}`
-      })
+      // sendTgCustomMessage({
+      //   message: `<strong>监控通知</strong>\n描述：转账失败\nTOKEN地址：${tokenMintAddress}\n错误信息：${error}`
+      // })
     }
   }
   return attempts;

@@ -9,6 +9,32 @@ dotenv.config();
 const GMGN_API_URL = process.env.GMGN_API_URL;
 
 /**
+ * 获取gmgn新币列表
+ * @param {*} params 
+ * @returns 
+ */
+async function getNewPoolList(params = {}) {
+  const { time = '1m', limit = 20} = params;
+  try {
+    // 构建 API 请求 URL
+    const url = `${GMGN_API_URL}/defi/quotation/v1/pairs/sol/new_pairs/${time}?limit=${limit}&orderby=open_timestamp&direction=desc&period=1m&filters[]=not_honeypot&filters[]=has_social&filters[]=renounced&filters[]=frozen&platforms[]=pump&platforms[]=moonshot&platforms[]=raydium`;
+    console.log('getPopularList:',url)
+    // 发送 GET 请求获取热门列表
+    const response = await sendRequest(url, { method: 'get' });
+    
+    // 检查 API 响应是否成功
+    if (response.code !== 0) throw response;
+    
+    // 返回热门代币排名数据
+    return response.data.pairs;
+  } catch (error) {
+    // 捕获并记录任何发生的错误
+    console.error('获取新币列表失败:', error);
+    return [];
+  }
+}
+
+/**
  * 获取热门代币列表
  * @param {Object} params - 请求参数
  * @param {string} [params.time='1m'] - 时间范围
@@ -272,6 +298,7 @@ export {
   checkSPLTokenAccount,
   getSolanaBalance,
   getSolanaTokenBalance,
+  getNewPoolList,
   getPopularList,
   getWalletHoldings,
   gmgnTokens,
