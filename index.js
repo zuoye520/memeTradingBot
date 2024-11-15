@@ -456,7 +456,7 @@ async function runBot() {
     }
   });
   // Upbit监控任务,每X秒执行一次
-  schedule.scheduleJob('monitorUpbit-task', `*/3 * * * * *`, async () => {
+  schedule.scheduleJob('monitorUpbit-task', `*/10 * * * * *`, async () => {
     try {
       await monitorUpbit();
     } catch (error) {
