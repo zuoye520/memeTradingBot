@@ -2,6 +2,7 @@
  * memeTradingBot
  * 专注于SOLANA网络meme交易
  */
+import schedule from 'node-schedule';
 import dotenv from 'dotenv';
 import { insertData, selectData, updateData, deleteOldData } from './utils/db.js';
 import redisManager from './utils/redisManager.js';
@@ -16,7 +17,6 @@ import {
   getWalletHoldings,
   executeSolanaTrade,
   executeRaydiumSwap,
-  fetchPoolKeys,
   getTransactionStatus
 } from './api/apiService.js';
 
@@ -25,6 +25,8 @@ import { decryptPrivateKey } from './utils/keyManager.js';
 //监控
 import { monitorDaosFun } from './monitor/daosfun.js';
 import { monitorTipTag } from './monitor/tiptag.js';
+import { monitorBinance } from './monitor/binance.js';
+import { monitorUpbit } from './monitor/upbit.js';
 
 dotenv.config();
 const sleep = (seconds) => {
@@ -126,6 +128,7 @@ async function checkAndExecuteBuy() {
         } catch (tradeError) {
           log.error(`为代币 ${token.symbol} 执行交易失败:`, tradeError);
           sendTgCustomMessage({
+            type:'Error',
             message: `<strong>监控通知</strong>\n描述：执行交易失败,${token.symbol}\nTOKEN地址：${token.address}\n错误信息：${tradeError}`
           })
         }
@@ -261,6 +264,7 @@ async function checkAndExecuteSell() {
           log.error(`为代币 ${symbol} 执行卖出失败:`, tradeError);
           if(JSON.stringify(tradeError).indexOf('amounts must greater than zero') < 0){
             sendTgCustomMessage({
+              type:'Error',
               message: `<strong>监控通知</strong>\n描述：执行交易失败,${symbol}\nTOKEN地址：${address}\n错误信息：${tradeError}`
             })
           }
@@ -374,21 +378,91 @@ async function cleanupOldData() {
  * 运行交易机器人
  * 这个函数是机器人的主循环，每分钟执行一次
  */
-async function runTradingBot() {
-  try {
-    log.info('启动 GMGN.ai 交易机器人...');
-    await initDatabase(); // 初始化数据库
-    // meme交易定时任务
-    setInterval(checkAndExecuteBuy, 1000 * 3); // 每10秒运行一次
-    setInterval(checkAndExecuteSell, 1000 * 5); // 每10秒检查一次
-    setInterval(checkPendingTransactions, 1000 * 10); // 每10秒检查一次待处理交易
-    setInterval(cleanupOldData, 1000 * 60 * 10); // 每10分钟运行一次清理任务
-    //监控定时任务
-    setInterval(monitorDaosFun, 1000 * 10); // 每10秒运行一次任务
-    setInterval(monitorTipTag, 1000 * 10); // 每10秒运行一次任务
-  } catch (error) {
-    log.error('定时任务运行失败:', error);
-  }
+async function runBot() {
+  log.info('启动 GMGN.ai 交易机器人...');
+  await initDatabase(); // 初始化数据库
+  // meme交易定时任务
+  // setInterval(checkAndExecuteBuy, 1000 * 3); // 每10秒运行一次
+  // setInterval(checkAndExecuteSell, 1000 * 5); // 每10秒检查一次
+  // setInterval(checkPendingTransactions, 1000 * 10); // 每10秒检查一次待处理交易
+  // setInterval(cleanupOldData, 1000 * 60 * 10); // 每10分钟运行一次清理任务
+  //监控定时任务
+  // setInterval(monitorDaosFun, 1000 * 10); // 每10秒运行一次任务
+  // setInterval(monitorTipTag, 1000 * 10); // 每10秒运行一次任务
+  // setInterval(monitorBinance, 1000 * 10); // 每10秒运行一次任务
+  // setInterval(monitorUpbit, 1000 * 10); // 每10秒运行一次任务
+
+  // meme交易定时任务
+  schedule.scheduleJob('checkAndExecuteBuy-task', `*/3 * * * * *`, async () => {
+    try {
+      await checkAndExecuteBuy();
+    } catch (error) {
+      log.error('checkAndExecuteBuy task error:', error);
+    }
+  });
+  schedule.scheduleJob('checkAndExecuteSell-task', `*/5 * * * * *`, async () => {
+    try {
+      await checkAndExecuteSell();
+    } catch (error) {
+      log.error('checkAndExecuteSell task error:', error);
+    }
+  });
+  schedule.scheduleJob('checkPendingTransactions-task', `*/10 * * * * *`, async () => {
+    try {
+      await checkPendingTransactions();
+    } catch (error) {
+      log.error('checkPendingTransactions task error:', error);
+    }
+  });
+  schedule.scheduleJob('cleanupOldData-task', `* */10 * * * *`, async () => {
+    try {
+      await cleanupOldData();
+    } catch (error) {
+      log.error('cleanupOldData task error:', error);
+    }
+  });
+
+
+  // monitorDaosFun监控任务,每X秒执行一次
+  schedule.scheduleJob('monitorDaosFun-task', `*/10 * * * * *`, async () => {
+    try {
+      await monitorDaosFun();
+    } catch (error) {
+      log.error('monitorDaosFun task error:', error);
+    }
+  });
+  // tipTag监控任务,每X秒执行一次
+  schedule.scheduleJob('monitorTipTag-task', `*/10 * * * * *`, async () => {
+    try {
+      await monitorTipTag();
+    } catch (error) {
+      log.error('monitorTipTag task error:', error);
+    }
+  });
+  // Binance监控任务,每X秒执行一次
+  schedule.scheduleJob('monitorBinance-task', `*/3 * * * * *`, async () => {
+    const lockKey = 'monitorBinance_lock';
+    try {
+      const lockSet = await redisManager.setTimeLock(lockKey, 10);//流程10秒
+      if (!lockSet) {
+        log.info('monitorBinance-task 锁已存在，操作被阻止');
+        return;
+      } 
+      await monitorBinance();
+    } catch (error) {
+      log.error('monitorBinance task error:', error);
+    } finally{
+      await redisManager.del(lockKey);
+    }
+  });
+  // Upbit监控任务,每X秒执行一次
+  schedule.scheduleJob('monitorUpbit-task', `*/3 * * * * *`, async () => {
+    try {
+      await monitorUpbit();
+    } catch (error) {
+      log.error('monitorUpbit task error:', error);
+    }
+  });
 }
 
-runTradingBot();
+runBot();

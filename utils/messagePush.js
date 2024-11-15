@@ -73,8 +73,9 @@ async function sendTgMessage(params = {}) {
     const tokenInfo = await gmgnTokens(tokenAddress);
     // console.log('tokenInfo:', tokenInfo);
     if (!tokenInfo.token.symbol) return;
-    chatIds.forEach((chatId) => {
-      const time = moment().format("YYYY/MM/DD HH:mm:ss");
+    // chatIds.forEach((chatId) => {
+    // });
+    const time = moment().format("YYYY/MM/DD HH:mm:ss");
       let text = `🔑密码来了🔑\n
 Sniper Address: <code>${sniperAddress}</code>\n
 Token Symbol: ${tokenInfo.token.symbol} (${tokenInfo.token.name})
@@ -94,7 +95,7 @@ launchpad: ${tokenInfo.token.launchpad}\n
 
       sendMessage({
         TOKEN: TG_BOT_TOKEN,
-        chatId: chatId,
+        chatId: chatIds[0],
         text: text,
         replyMarkup: {
           inline_keyboard: [
@@ -104,15 +105,21 @@ launchpad: ${tokenInfo.token.launchpad}\n
         },
         mode: "HTML"
       });
-    });
   } catch (error) {
     console.error('推送消息失败:', error);
   }
 }
 
+/**
+ * 自定义消息推送
+ * @param {*} params 
+ * @param {*} params.type ['Admin'|'Group'|'Error'] 消息类型,系统管理员、群推、错误信息只推给管理员
+ * @returns 
+ */
 async function sendTgCustomMessage(params = {}) {
   try {
-    const { message,inlineKeyboard = [],lockKey, timer } = params;
+    const { type = 'Admin', message,inlineKeyboard = [],lockKey, timer } = params;
+
     if(lockKey && timer){//通知消息锁
       const lockSet = await redisManager.setTimeLock(lockKey, timer);
       if (!lockSet) {
@@ -120,20 +127,33 @@ async function sendTgCustomMessage(params = {}) {
         return;
       }
     }
-    chatIds.forEach((chatId) => {
-      const time = moment().format("YYYY/MM/DD HH:mm:ss");
-      let text = `${message}\n播报时间: ${time}`;
+    const time = moment().format("YYYY/MM/DD HH:mm:ss");
+    let text = `${message}\n播报时间: ${time}`;
 
+    if(type == 'Admin' || type == 'Error'){
       sendMessage({
         TOKEN: TG_BOT_TOKEN,
-        chatId: chatId,
+        chatId: chatIds[0],//取第一个
         text: text,
         replyMarkup: {
           inline_keyboard:inlineKeyboard
         },
         mode: "HTML"
       });
-    });
+    }else if(type == 'Group'){
+      chatIds.forEach((chatId) => {
+        sendMessage({
+          TOKEN: TG_BOT_TOKEN,
+          chatId: chatId,
+          text: text,
+          replyMarkup: {
+            inline_keyboard:inlineKeyboard
+          },
+          mode: "HTML"
+        });
+      });
+    }
+    
   } catch (error) {
     console.error('推送消息失败:', error);
   }

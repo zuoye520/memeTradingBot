@@ -290,7 +290,40 @@ async function getTipTagNewList(chain = 'base') {
     throw error;
   }
 }
-
+/**
+ * Binance 公告
+ * @returns 
+ */
+async function getBinanceArticleList() {
+  try {
+    // 构建 API 请求 URL
+    let url = `https://www.binance.com/bapi/apex/v1/public/apex/cms/article/list/query?type=1&pageSize=5&pageNo=1`; 
+    console.log('getBnArticleList:',url)
+    const response = await sendRequest(url, { method: 'get' });
+    if(!response.success) throw response
+    return response.data.catalogs;
+  } catch (error) {
+    console.error('getBinanceArticleList Error:', error);
+    throw error;
+  }
+}
+/**
+ * Upbit 公告
+ * @returns 
+ */
+async function getUpbitArticleList() {
+  try {
+    // 构建 API 请求 URL
+    let url = `https://api-manager.upbit.com/api/v1/announcements?os=web&page=1&per_page=5&category=trade`; 
+    console.log('getUpbitArticleList:',url)
+    const response = await sendRequest(url, { method: 'get' });
+    if(!response.success) throw response
+    return response.data.notices;
+  } catch (error) {
+    console.error('getUpbitArticleList Error:', error);
+    throw error;
+  }
+}
 
 
 export {
@@ -307,5 +340,7 @@ export {
   fetchPoolKeys,
   getTransactionStatus,
   getDaosFunList,
-  getTipTagNewList
+  getTipTagNewList,
+  getBinanceArticleList,
+  getUpbitArticleList
 };

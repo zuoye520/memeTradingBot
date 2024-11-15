@@ -2,6 +2,7 @@
  * memeTradingBot
  * 专注于SOLANA网络meme交易
  */
+import schedule from 'node-schedule';
 import dotenv from 'dotenv';
 import { insertData, selectData, updateData, deleteOldData } from './utils/db.js';
 import redisManager from './utils/redisManager.js';
@@ -24,6 +25,9 @@ import { decryptPrivateKey } from './utils/keyManager.js';
 //监控
 import { monitorDaosFun } from './monitor/daosfun.js';
 import { monitorTipTag } from './monitor/tiptag.js';
+import { monitorBinance } from './monitor/binance.js';
+import { monitorUpbit } from './monitor/upbit.js';
+
 
 dotenv.config();
 const sleep = (seconds) => {
@@ -332,12 +336,14 @@ async function executeTransferSPLToken(tokenMintAddress) {
       await transferSPLToken(recipientAddress, tokenMintAddress, amount, decimals);
       attempts = MAX_RETRIES;
       sendTgCustomMessage({
+        type:'Admin',
         message: `<strong>监控通知</strong>\n描述：转账成功\nTOKEN地址：${tokenMintAddress}`
       })
     } catch (error) {
       attempts++;
       // 5. 推送消息
       sendTgCustomMessage({
+        type:'Error',
         message: `<strong>监控通知</strong>\n描述：转账失败\nTOKEN地址：${tokenMintAddress}\n错误信息：${error}`
       })
     }
@@ -363,9 +369,14 @@ async function cleanupOldData() {
  * 运行交易机器人
  * 这个函数是机器人的主循环，每分钟执行一次
  */
-async function runTradingBot() {
+async function runBot() {
   try {
     log.info('启动 GMGN.ai 交易机器人...');
+    // Binance监控任务,每X秒执行一次
+    // Binance监控任务,每X秒执行一次
+    
+    // monitorBinance()
+    // monitorUpbit()
     // await initDatabase(); // 初始化数据库
     // // meme交易定时任务
     // setInterval(checkAndExecuteBuy, 1000 * 3); // 每10秒运行一次
@@ -375,8 +386,8 @@ async function runTradingBot() {
     // //监控定时任务
     // setInterval(monitorDaosFun, 1000 * 10); // 每10秒运行一次任务
     // setInterval(monitorTipTag, 1000 * 10); // 每10秒运行一次任务
-    const address = 'EsNwBBJS7yR5ieUfsL5YrEFoVTmvL1Jk9MqcXxqEpump',
-      amount = 30;
+    // const address = 'EsNwBBJS7yR5ieUfsL5YrEFoVTmvL1Jk9MqcXxqEpump',
+    //   amount = 30;
     // const tradeData = {
     //   swapMode: 'ExactIn',//TOKEN->SOL
     //   inputToken: process.env.SOL_ADDRESS,//TOKEN
@@ -409,4 +420,4 @@ async function runTradingBot() {
   }
 }
 
-runTradingBot();
+runBot();
