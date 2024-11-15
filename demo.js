@@ -8,7 +8,7 @@ import { insertData, selectData, updateData, deleteOldData } from './utils/db.js
 import redisManager from './utils/redisManager.js';
 import { initDatabase } from './utils/dbInit.js';
 import log from './utils/log.js';
-
+import wechatBot from './utils/wechatBot.js';
 import {
   transferSPLToken,
   getSolanaBalance,
@@ -372,8 +372,11 @@ async function cleanupOldData() {
 async function runBot() {
   try {
     log.info('启动 GMGN.ai 交易机器人...');
-    // Binance监控任务,每X秒执行一次
-    // Binance监控任务,每X秒执行一次
+    try {
+      await wechatBot.initialize();
+    } catch (error) {
+      log.error('Failed to initialize WeChat bot:', error);
+    }
     
     // monitorBinance()
     // monitorUpbit()

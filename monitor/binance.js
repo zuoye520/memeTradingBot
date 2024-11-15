@@ -35,6 +35,7 @@ async function monitorBinance(){
       }else{
         // log.info(`Binance 当前最新公告：`,found.articles[0])
       }
+      lastArticle = found.articles[0]
     }
 
   } catch (error) {

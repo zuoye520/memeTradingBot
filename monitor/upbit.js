@@ -26,6 +26,7 @@ async function monitorUpbit(){
       }else{
         // log.info(`Upbit 当前最新公告：`,list[0])
       }
+      lastArticle = list[0]
     }
 
   } catch (error) {
