@@ -314,7 +314,7 @@ async function getBinanceArticleList() {
 async function getUpbitArticleList() {
   try {
     // 构建 API 请求 URL
-    let url = `https://api-manager.upbit.com/api/v1/announcements?os=web&page=1&per_page=5&category=trade`; 
+    let url = `https://api-manager.upbit.com/api/v1/announcements?os=web&page=1&per_page=20&category=trade`; 
     console.log('getUpbitArticleList:',url)
     const response = await sendRequest(url, { method: 'get' });
     if(!response.success) throw response
