@@ -1,13 +1,14 @@
 import { WechatyBuilder } from 'wechaty';
 import log from './log.js';
+import moment from 'moment';
 
 class WechatBot {
   constructor() {
     this.bot = null;
     this.ready = false;
-    this.receivers = process.env.WECHAT_RECEIVERS 
+    this.receivers = process.env.WECHAT_RECEIVERS
       ? process.env.WECHAT_RECEIVERS.split(',')
-      : ['Azz'];
+      : [''];
   }
 
   async initialize() {
@@ -16,7 +17,6 @@ class WechatBot {
     }
 
     this.bot = WechatyBuilder.build();
-
     this.bot
       .on('scan', (qrcode, status) => {
         const qrcodeImageUrl = `https://wechaty.js.org/qrcode/${encodeURIComponent(qrcode)}`;
@@ -33,9 +33,8 @@ class WechatBot {
       .on('error', (error) => {
         log.error('Bot error:', error);
       })
-      .on('message',(message)=>{
+      .on('message', (message) => {
         log.info('Bot Message:', message);
-        this.sendMessage('标题','测试内容')
       });
 
     try {
@@ -47,42 +46,44 @@ class WechatBot {
     }
   }
 
-  async sendMessage(title, content) {
+  async sendMessage(params = {}) {
     if (!this.ready) {
-      log.warn('Bot is not ready. Try to initialize...');
+      log.error('Bot is not ready. Try to initialize...');
       await this.initialize();
     }
-
     if (!this.ready) {
       throw new Error('Bot is still not ready after initialization');
     }
+    const { type = 'Admin', message } = params;
 
-    const message = `${title}\n\n${content}`;
-
-    for (const receiver of this.receivers) {
-      try {
-        // 支持发送到联系人或群聊
-        const contact = await this.bot.Contact.find({ name: receiver }) ||
-                       await this.bot.Room.find({ topic: receiver });
-                       
-        if (contact) {
-          await contact.say(message);
-          log.info(`Message sent to ${receiver} successfully`);
-          const urlMessage = {
-            description: 'Wechaty is a Bot SDK for Wechat Individual Account which can help you create a bot in 6 lines of javascript, with cross-platform support including Linux, Windows, Darwin(OSX/Mac) and Docker.',
-            thumbnailUrl: 'https://camo.githubusercontent.com/f310a2097d4aa79d6db2962fa42bb3bb2f6d43df/68747470733a2f2f6368617469652e696f2f776563686174792f696d616765732f776563686174792d6c6f676f2d656e2e706e67',
-            title: 'Wechaty',
-            url: 'https://github.com/wechaty/wechaty',
-          };
-          await contact.say(await this.bot.UrlLink.create(urlMessage));
-          log.info(`Message sent to ${receiver} successfully`);
-        } else {
-          log.warn(`Receiver not found: ${receiver}`);
+    const time = moment().format("YYYY/MM/DD HH:mm:ss");
+    let text = `${message}\n播报时间: ${time}`;
+    let receiver = this.receivers[0];
+    if(type == 'Group') receiver = this.receivers[1];
+    try {
+      // 支持发送到联系人或群聊
+      const contact = await this.bot.Contact.find({ name: receiver }) ||
+        await this.bot.Room.find({ topic: receiver });
+      if (contact) {
+        const MAX_RETRIES = 3;
+        let attempts = 0;
+        while (attempts < MAX_RETRIES) {
+          try {
+            await contact.say(text);
+            log.info(`Message sent to ${receiver} successfully`);
+            attempts = MAX_RETRIES;
+          } catch (error) {
+            log.error(`Message sent to ${receiver} error`, error);
+            attempts++;
+          }
         }
-      } catch (error) {
-        log.error(`Failed to send message to ${receiver}:`, error);
+      } else {
+        log.error(`Receiver not found: ${receiver}`);
       }
+    } catch (error) {
+      log.error(`Failed to send message to ${receiver}:`, error);
     }
+    return;
   }
 
   async stop() {

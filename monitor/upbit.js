@@ -1,6 +1,6 @@
 import log from '../utils/log.js';
 import moment from 'moment';
-import { sendTgCustomMessage } from '../utils/messagePush.js';
+import { notify } from '../utils/notify.js';
 import {
   getUpbitArticleList
 } from '../api/apiService.js';
@@ -16,7 +16,7 @@ async function monitorUpbit(){
       if(lastArticle.id != id){
         const time = moment(listed_at).format("YYYY/MM/DD HH:mm:ss");
         const link = `https://upbit.com/service_center/notice?id=${id}`;
-        sendTgCustomMessage({
+        notify({
           type:'Group',
           message: `<strong>监控通知</strong>\n监控平台：Upbit(韩国站)\n公告标题：${title}\n公告时间：${time}`,
           inlineKeyboard:[
@@ -31,7 +31,7 @@ async function monitorUpbit(){
 
   } catch (error) {
     log.error('Upbit 监控出现异常:',error)
-    sendTgCustomMessage({
+    notify({
       type:'Error',
       message: `Upbit 监控出现异常`,
       lockKey:'upbit_error_lock', 

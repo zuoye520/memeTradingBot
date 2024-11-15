@@ -1,5 +1,5 @@
 import log from '../utils/log.js';
-import { sendTgCustomMessage } from '../utils/messagePush.js';
+import { notify } from '../utils/notify.js';
 import {
   getTipTagNewList
 } from '../api/apiService.js';
@@ -20,7 +20,7 @@ async function monitorTipTag(){
         if(list.length <=0) return;
         const chain = index === 0 ? 'base' : index === 1 ? 'eth' : 'enuls'
         if(newsProject[index][0].token !== list[0].token){
-          sendTgCustomMessage({
+          notify({
             type:'Group',
             message: `<strong>监控通知</strong>\n监控平台：TipTag\n监控网络：${chain}\n描述：疑是有新项目发布\n项目信息：${list[0].name}`
           })
@@ -33,7 +33,7 @@ async function monitorTipTag(){
     }
   } catch (error) {
     log.error('TipTag 监控出现异常:',error)
-    sendTgCustomMessage({
+    notify({
       type:'Error',
       message: `TipTag 监控出现异常`,
       lockKey:'tiptag_error_lock', 

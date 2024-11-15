@@ -1,6 +1,6 @@
 import log from '../utils/log.js';
 import moment from 'moment';
-import { sendTgCustomMessage } from '../utils/messagePush.js';
+import { notify } from '../utils/notify.js';
 import {
   getBinanceArticleList
 } from '../api/apiService.js';
@@ -25,7 +25,7 @@ async function monitorBinance(){
       if(lastArticle.id != id){
         const time = moment(releaseDate).format("YYYY/MM/DD HH:mm:ss");
         const link = getArticleLink(title,code);
-        sendTgCustomMessage({
+        notify({
           type:'Group',
           message: `<strong>监控通知</strong>\n监控平台：Binance\n公告标题：${title}\n公告时间：${time}`,
           inlineKeyboard:[
@@ -40,7 +40,7 @@ async function monitorBinance(){
 
   } catch (error) {
     log.error('Binance 监控出现异常:',error)
-    sendTgCustomMessage({
+    notify({
       type:'Error',
       message: `Binance 监控出现异常`,
       lockKey:'binance_error_lock', 

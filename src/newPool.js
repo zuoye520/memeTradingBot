@@ -9,7 +9,7 @@ import {
   getNewPoolList
 } from '../api/apiService.js';
 
-import { sendTgMessage,sendTgCustomMessage } from '../utils/messagePush.js';
+
 
 async function checkNewPoolAndExecuteBuy(){
 

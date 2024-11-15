@@ -20,7 +20,7 @@ import {
   getTransactionStatus
 } from './api/apiService.js';
 
-import { sendTgMessage,sendTgCustomMessage } from './utils/messagePush.js';
+import { notify } from './utils/notify.js';
 import { decryptPrivateKey } from './utils/keyManager.js';
 //监控
 import { monitorDaosFun } from './monitor/daosfun.js';
@@ -128,10 +128,9 @@ async function checkAndExecuteBuy() {
           log.error(`为代币 ${token.symbol} 执行交易失败:`, tradeError);
         }
         // 6. 推送消息
-        sendTgMessage({
-          sniperAddress: process.env.SOL_WALLET_ADDRESS,
-          tokenAddress: token.address,
-          memo:`买入操作，买入数量: ${process.env.SOL_TRADE_AMOUNT}SOL`
+        notify({
+          type:'Admin',
+          message: `<strong>监控通知</strong>\n描述：执行买入\nSYMBOL:${token.symbol}\nTOKEN地址：${token.address}\n买入数量：${process.env.SOL_TRADE_AMOUNT}SOL`,
         });
       } else {
         log.info(`代币${token.symbol}，${token.address} 在 token_info 表中，跳过`);
@@ -243,10 +242,9 @@ async function checkAndExecuteSell() {
               gas_fee: 0
             });
             // 5. 推送消息
-            sendTgMessage({
-              sniperAddress: process.env.SOL_WALLET_ADDRESS,
-              tokenAddress: address,
-              memo:`卖出操作，当前盈亏百分比: ${profitPercentage.toFixed(2)}%，卖出数量: ${sellAmount.toFixed(0)}${symbol}`
+            notify({
+              type:'Admin',
+              message: `<strong>监控通知</strong>\n描述：执行卖出\nSYMBOL:${symbol}\nTOKEN地址：${address}\n卖出数量：${sellAmount.toFixed(0)}${symbol}\n收益率：${profitPercentage.toFixed(2)}%`,
             });
           }else{
             await insertData('token_info', {
@@ -335,14 +333,14 @@ async function executeTransferSPLToken(tokenMintAddress) {
       const amount = (uiAmount * 0.1).toFixed(0) * 1;//转账10%
       await transferSPLToken(recipientAddress, tokenMintAddress, amount, decimals);
       attempts = MAX_RETRIES;
-      sendTgCustomMessage({
+      notify({
         type:'Admin',
         message: `<strong>监控通知</strong>\n描述：转账成功\nTOKEN地址：${tokenMintAddress}`
       })
     } catch (error) {
       attempts++;
       // 5. 推送消息
-      sendTgCustomMessage({
+      notify({
         type:'Error',
         message: `<strong>监控通知</strong>\n描述：转账失败\nTOKEN地址：${tokenMintAddress}\n错误信息：${error}`
       })
@@ -365,6 +363,12 @@ async function cleanupOldData() {
   }
 }
 
+async function test(){
+  notify({
+    type:'Group',
+    message:'测试微信Bot消息群发'
+  })
+}
 /**
  * 运行交易机器人
  * 这个函数是机器人的主循环，每分钟执行一次
@@ -377,6 +381,8 @@ async function runBot() {
     } catch (error) {
       log.error('Failed to initialize WeChat bot:', error);
     }
+    
+    // setInterval(test, 1000 * 10);
     
     // monitorBinance()
     // monitorUpbit()

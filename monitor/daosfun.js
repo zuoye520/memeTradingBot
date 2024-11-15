@@ -1,5 +1,5 @@
 import log from '../utils/log.js';
-import { sendTgCustomMessage } from '../utils/messagePush.js';
+import { notify } from '../utils/notify.js';
 import {
   getDaosFunList
 } from '../api/apiService.js';
@@ -12,7 +12,7 @@ async function monitorDaosFun(){
       daos = list[1].result.data.daos[0].dao_mint
     }else{
       if(daos !== list[1].result.data.daos[0].dao_mint){
-        sendTgCustomMessage({
+        notify({
           type:'Group',
           message: `<strong>监控通知</strong>\n监控平台：DAOS.FUN\n描述：疑是有新基金发布\n最新基金DAO地址：${list[1].result.data.daos[0].dao_mint}`
         })
@@ -23,7 +23,7 @@ async function monitorDaosFun(){
     }
   } catch (error) {
     log.error('DAOSFUN 监控出现异常:',error)
-    sendTgCustomMessage({
+    notify({
       type:'Error',
       message: `DAOSFUN 监控出现异常`,
       lockKey:'daos_fun_error_lock', 
