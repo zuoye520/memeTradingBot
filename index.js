@@ -129,13 +129,17 @@ async function checkAndExecuteBuy() {
           log.error(`为代币 ${token.symbol} 执行交易失败:`, tradeError);
           notify({
             type:'Error',
-            message: `<strong>监控通知</strong>\n描述：执行交易失败,${token.symbol}\nTOKEN地址：${token.address}\n错误信息：${tradeError}`
+            message: `监控通知\n描述：执行交易失败,${token.symbol}\nTOKEN地址：${token.address}\n错误信息：${tradeError}`
           })
         }
         // 6. 推送消息
         notify({
           type:'Admin',
-          message: `<strong>监控通知</strong>\n描述：执行买入\nSYMBOL:${token.symbol}\nTOKEN地址：${token.address}\n买入数量：${process.env.SOL_TRADE_AMOUNT}SOL`,
+          message: `监控通知\n描述：执行买入\nSYMBOL：${token.symbol}\nTOKEN地址：${token.address}\n买入数量：${process.env.SOL_TRADE_AMOUNT} SOL`,
+          inlineKeyboard:[
+            [{ text: "行情K线", url: `https://gmgn.ai/sol/token/${token.address}` }],
+            [{ text: "交易记录", url: `https://gmgn.ai/sol/address/${process.env.SOL_WALLET_ADDRESS}` }]
+          ]
         });
       } else {
         log.info(`代币${token.symbol}，${token.address} 在 token_info 表中，跳过`);
@@ -249,7 +253,11 @@ async function checkAndExecuteSell() {
             // 5. 推送消息
             notify({
               type:'Admin',
-              message: `<strong>监控通知</strong>\n描述：执行卖出\nSYMBOL:${symbol}\nTOKEN地址：${address}\n卖出数量：${sellAmount.toFixed(0)}${symbol}\n收益率：${profitPercentage.toFixed(2)}%`,
+              message: `监控通知\n描述：执行卖出\nSYMBOL：${symbol}\nTOKEN地址：${address}\n卖出数量：${sellAmount.toFixed(0)} ${symbol}\n收益率：${profitPercentage.toFixed(2)}%`,
+              inlineKeyboard:[
+                [{ text: "行情K线", url: `https://gmgn.ai/sol/token/${address}` }],
+                [{ text: "交易记录", url: `https://gmgn.ai/sol/address/${process.env.SOL_WALLET_ADDRESS}` }]
+              ]
             });
           }else{
             await insertData('token_info', {
@@ -263,7 +271,7 @@ async function checkAndExecuteSell() {
           if(JSON.stringify(tradeError).indexOf('amounts must greater than zero') < 0){
             notify({
               type:'Error',
-              message: `<strong>监控通知</strong>\n描述：执行交易失败,${symbol}\nTOKEN地址：${address}\n错误信息：${tradeError}`
+              message: `监控通知\n描述：执行交易失败,${symbol}\nTOKEN地址：${address}\n错误信息：${tradeError}`
             })
           }
         }
@@ -345,13 +353,13 @@ async function executeTransferSPLToken(tokenMintAddress) {
       await transferSPLToken(recipientAddress, tokenMintAddress, amount, decimals);
       attempts = MAX_RETRIES;
       // notify({
-      //   message: `<strong>监控通知</strong>\n描述：转账成功\nTOKEN地址：${tokenMintAddress}`
+      //   message: `监控通知\n描述：转账成功\nTOKEN地址：${tokenMintAddress}`
       // })
     } catch (error) {
       attempts++;
       // 5. 推送消息
       // notify({
-      //   message: `<strong>监控通知</strong>\n描述：转账失败\nTOKEN地址：${tokenMintAddress}\n错误信息：${error}`
+      //   message: `监控通知\n描述：转账失败\nTOKEN地址：${tokenMintAddress}\n错误信息：${error}`
       // })
     }
   }
