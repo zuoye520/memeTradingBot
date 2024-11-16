@@ -135,7 +135,7 @@ async function checkAndExecuteBuy() {
         // 6. 推送消息
         notify({
           type:'Admin',
-          message: `监控通知\n描述：执行买入\nSYMBOL：${token.symbol}\nTOKEN地址：${token.address}\n买入数量：${process.env.SOL_TRADE_AMOUNT} SOL`,
+          message: `监控通知\n描述：💰执行买入💰\nSymbol：${token.symbol}\nToken Address：${token.address}\n买入数量：${process.env.SOL_TRADE_AMOUNT} SOL`,
           inlineKeyboard:[
             [{ text: "行情K线", url: `https://gmgn.ai/sol/token/${token.address}` }],
             [{ text: "交易记录", url: `https://gmgn.ai/sol/address/${process.env.SOL_WALLET_ADDRESS}` }]
@@ -253,7 +253,7 @@ async function checkAndExecuteSell() {
             // 5. 推送消息
             notify({
               type:'Admin',
-              message: `监控通知\n描述：执行卖出\nSYMBOL：${symbol}\nTOKEN地址：${address}\n卖出数量：${sellAmount.toFixed(0)} ${symbol}\n收益率：${profitPercentage.toFixed(2)}%`,
+              message: `监控通知\n描述：🎉执行卖出🎉\nSymbol：${symbol}\nToken Address：${address}\n卖出数量：${sellAmount.toFixed(0)} ${symbol}\n收益率：${profitPercentage.toFixed(2)}%`,
               inlineKeyboard:[
                 [{ text: "行情K线", url: `https://gmgn.ai/sol/token/${address}` }],
                 [{ text: "交易记录", url: `https://gmgn.ai/sol/address/${process.env.SOL_WALLET_ADDRESS}` }]
