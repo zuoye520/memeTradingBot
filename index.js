@@ -28,7 +28,8 @@ import { monitorTipTag } from './monitor/tiptag.js';
 import { monitorBinance } from './monitor/binance.js';
 import { monitorUpbit } from './monitor/upbit.js';
 import { monitorOkx } from './monitor/okx.js';
-
+import { monitorGate } from './monitor/gate.js';
+import { monitorMexc } from './monitor/mexc.js';
 
 dotenv.config();
 const sleep = (seconds) => {
@@ -489,6 +490,27 @@ async function runBot() {
       await redisManager.del(lockKey);
     }
   });
+  // Gate监控任务,执行一次
+  monitorGate()
+
+  
+  // Mexc监控任务,每X秒执行一次
+  schedule.scheduleJob('monitorMexc-task', `*/5 * * * * *`, async () => {
+    const lockKey = 'monitorMexc_lock';
+    try {
+      const lockSet = await redisManager.setTimeLock(lockKey, 10);//流程10秒
+      if (!lockSet) {
+        log.info('monitorMexc-task 锁已存在，操作被阻止');
+        return;
+      } 
+      await monitorMexc();
+    } catch (error) {
+      log.error('monitorMexc task error:', error);
+    } finally{
+      await redisManager.del(lockKey);
+    }
+  });
+
 }
 
 runBot();

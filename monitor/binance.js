@@ -27,7 +27,7 @@ async function monitorBinance(){
         const link = getArticleLink(title,code);
         notify({
           type:'Group',
-          message: `<strong>监控通知</strong>\n监控平台：Binance\n公告标题：${title}\n公告时间：${time}`,
+          message: `<strong>监控通知</strong>\n监控平台：Binance\n公告标题：${title}\n公告类型：新币种上线\n公告时间：${time}`,
           inlineKeyboard:[
             [{ text: "🚀查看公告详情🚀", url: link }],
           ]
