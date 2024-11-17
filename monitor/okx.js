@@ -18,9 +18,9 @@ class API {
 	signMessage(timestamp, method, requestPath, params) {
 
 		let paramStr = `${timestamp}${method}${requestPath}${params && JSON.stringify(params)}`
-		console.log('signMessage===>',paramStr)
+		// console.log('signMessage===>',paramStr)
 		paramStr = crypto.createHmac('sha256', this.secret).update(paramStr).digest().toString('base64');
-    console.log('paramStr===>',paramStr)
+    // console.log('paramStr===>',paramStr)
 		return paramStr;
 	}
 	/**
