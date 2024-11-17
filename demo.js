@@ -27,6 +27,8 @@ import { monitorDaosFun } from './monitor/daosfun.js';
 import { monitorTipTag } from './monitor/tiptag.js';
 import { monitorBinance } from './monitor/binance.js';
 import { monitorUpbit } from './monitor/upbit.js';
+import { monitorOkx } from './monitor/okx.js';
+
 
 
 dotenv.config();
@@ -384,14 +386,13 @@ async function test(){
 async function runBot() {
   try {
     log.info('启动 GMGN.ai 交易机器人...');
-    try {
-      await wechatBot.initialize();
-    } catch (error) {
-      log.error('Failed to initialize WeChat bot:', error);
-    }
+    // try {
+    //   await wechatBot.initialize();
+    // } catch (error) {
+    //   log.error('Failed to initialize WeChat bot:', error);
+    // }
     
-    // setInterval(test, 1000 * 10);
-    
+    // monitorOkx()
     // monitorBinance()
     // monitorUpbit()
     // await initDatabase(); // 初始化数据库

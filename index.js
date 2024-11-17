@@ -27,6 +27,8 @@ import { monitorDaosFun } from './monitor/daosfun.js';
 import { monitorTipTag } from './monitor/tiptag.js';
 import { monitorBinance } from './monitor/binance.js';
 import { monitorUpbit } from './monitor/upbit.js';
+import { monitorOkx } from './monitor/okx.js';
+
 
 dotenv.config();
 const sleep = (seconds) => {
@@ -469,6 +471,22 @@ async function runBot() {
       await monitorUpbit();
     } catch (error) {
       log.error('monitorUpbit task error:', error);
+    }
+  });
+  // OKX监控任务,每X秒执行一次
+  schedule.scheduleJob('monitorOkx-task', `*/3 * * * * *`, async () => {
+    const lockKey = 'monitorOkx_lock';
+    try {
+      const lockSet = await redisManager.setTimeLock(lockKey, 10);//流程10秒
+      if (!lockSet) {
+        log.info('monitorOkx-task 锁已存在，操作被阻止');
+        return;
+      } 
+      await monitorOkx();
+    } catch (error) {
+      log.error('monitorOkx task error:', error);
+    } finally{
+      await redisManager.del(lockKey);
     }
   });
 }

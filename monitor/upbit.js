@@ -9,6 +9,7 @@ let lastArticle = null;//缓存
 async function monitorUpbit(){
   try {
     const list = await getUpbitArticleList()
+    console.log('list:',list)
     if(!lastArticle){
       lastArticle = list[0]
     }else{
