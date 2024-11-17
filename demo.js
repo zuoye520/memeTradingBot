@@ -393,7 +393,7 @@ async function runBot() {
     //   log.error('Failed to initialize WeChat bot:', error);
     // }
     // monitorMexc()
-    // monitorGate()
+    monitorGate()
     // monitorOkx()
     // monitorBinance()
     // monitorUpbit()

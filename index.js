@@ -493,9 +493,8 @@ async function runBot() {
   // Gate监控任务,执行一次
   monitorGate()
 
-  
   // Mexc监控任务,每X秒执行一次
-  schedule.scheduleJob('monitorMexc-task', `*/5 * * * * *`, async () => {
+  schedule.scheduleJob('monitorMexc-task', `*/10 * * * * *`, async () => {
     const lockKey = 'monitorMexc_lock';
     try {
       const lockSet = await redisManager.setTimeLock(lockKey, 10);//流程10秒

@@ -332,9 +332,10 @@ async function getUpbitArticleList() {
 async function getMexcArticleList() {
   try {
     // 构建 API 请求 URL
-    let url = `http://103.153.101.112:1150/help/announce/api/en-US/section/15425930840735/articles?page=1&perPage=10`; 
+    let url = `https://www.mexc.com/help/announce/api/en-US/section/15425930840735/articles?page=1&perPage=10`; 
     console.log('getMexcArticleList:',url)
     const response = await sendRequest(url, { method: 'get' });
+    console.log('getMexcArticleList result:',response)
     if(response.msg !=='success') throw response
     return response.data.results;
   } catch (error) {

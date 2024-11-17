@@ -56,7 +56,7 @@ function msNotify(data){
     }else{
       const {title,origin_url:url,published_at:pTime} = data
       console.log('data:',data)
-      if(lastArticle.url != url){
+      if(lastArticle.origin_url != url){
         const time = moment(pTime*1000).format("YYYY/MM/DD HH:mm:ss");
         notify({
           type:'Group',
