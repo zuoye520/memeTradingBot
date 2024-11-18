@@ -12,7 +12,6 @@ async function monitorTipTag(){
       getTipTagNewList('eth'),
       getTipTagNewList('enuls')
     ]);
-    log.info('results:',results)
     if(!newsProject){
       newsProject = results
     }else{
