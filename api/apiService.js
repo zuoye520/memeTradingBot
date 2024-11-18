@@ -331,11 +331,31 @@ async function getUpbitArticleList() {
  * @returns 
  */
 async function getMexcArticleList() {
+  const headers = {
+    "Accept": "*/*",
+    "Sec-Fetch-Site": "same-site",
+    "Accept-Language": "zh-CN,zh-Hans;q=0.9",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Sec-Fetch-Mode": "cors",
+    "Content-Type": "application/json",
+    // Content-Length: 55
+    "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+    "Referer": "https://www.mexc.com/zh-TW/support/categories/360000254192?handleDefaultLocale=keep",
+    "Connection": "keep-alive",
+    "Sec-Fetch-Dest": "empty",
+    "sentry-trace":"ca7e2df4086b4afebe27e75829e30a0f-884c7f445efd6c36-0",
+    "trochilus-trace-id":"27120a1e-1e5a-4aa5-b734-48a02cdeffb9-0305",
+    "trochilus-uid":"29008685"
+};
   try {
     // 构建 API 请求 URL
-    let url = `https://www.mexc.com/help/announce/api/en-US/section/15425930840735/articles?page=1&perPage=10`; 
+    // let url = `https://www.mexc.com/help/announce/api/en-US/section/15425930840735/articles?page=1&perPage=10`; 
+    const url = `https://www.mexc.com/help/announce/api/zh-TW/section/15425930840735/articles?page=1&perPage=20`
     console.log('getMexcArticleList:',url)
-    const response = await sendRequest(url, { method: 'get' });
+    const response = await sendRequest(url, { 
+      headers,
+      method: 'get' 
+    });
     console.log('getMexcArticleList result:',response)
     if(response.msg !=='success') throw response
     return response.data.results;

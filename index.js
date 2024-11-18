@@ -425,7 +425,8 @@ async function runBot() {
       log.error('checkPendingTransactions task error:', error);
     }
   });
-  schedule.scheduleJob('cleanupOldData-task', `* */10 * * * *`, async () => {
+  //每10分钟执行一次
+  schedule.scheduleJob('cleanupOldData-task', `*/10 * * * *`, async () => {
     try {
       await cleanupOldData();
     } catch (error) {
@@ -494,21 +495,21 @@ async function runBot() {
   monitorGate()
 
   // Mexc监控任务,每X秒执行一次
-  // schedule.scheduleJob('monitorMexc-task', `*/10 * * * * *`, async () => {
-  //   const lockKey = 'monitorMexc_lock';
-  //   try {
-  //     const lockSet = await redisManager.setTimeLock(lockKey, 10);//流程10秒
-  //     if (!lockSet) {
-  //       log.info('monitorMexc-task 锁已存在，操作被阻止');
-  //       return;
-  //     } 
-  //     await monitorMexc();
-  //   } catch (error) {
-  //     log.error('monitorMexc task error:', error);
-  //   } finally{
-  //     await redisManager.del(lockKey);
-  //   }
-  // });
+  schedule.scheduleJob('monitorMexc-task', `*/5 * * * * *`, async () => {
+    const lockKey = 'monitorMexc_lock';
+    try {
+      const lockSet = await redisManager.setTimeLock(lockKey, 10);//流程10秒
+      if (!lockSet) {
+        log.info('monitorMexc-task 锁已存在，操作被阻止');
+        return;
+      } 
+      await monitorMexc();
+    } catch (error) {
+      log.error('monitorMexc task error:', error);
+    } finally{
+      await redisManager.del(lockKey);
+    }
+  });
 
 }
 
