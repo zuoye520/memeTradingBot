@@ -102,7 +102,7 @@ function msNotify(data){
       if(lastArticle.origin_url != url){
         const time = moment(pTime*1000).format("YYYY/MM/DD HH:mm:ss");
         notify({
-          type:'Group',
+          type:'Admin',//Group
           message: `监控通知\n监控平台：Gate\n公告标题：${title}\n公告类型：新币种上线\n推送时间：${time}`,
           inlineKeyboard:[
             [{ text: "🚀查看公告详情🚀", url: url }],
