@@ -62,7 +62,7 @@ class WechatBot {
     inlineKeyboard.map((item)=>{
       urls += `\n${item[0].text}：${item[0].url}`
     })
-    let text = `${message}${urls}\n播报时间: ${time}`;
+    let text = `${message}\n播报时间：${time}${urls}`;
     let receiver = this.receivers[0];
     if(type == 'Group') receiver = this.receivers[1];
     try {

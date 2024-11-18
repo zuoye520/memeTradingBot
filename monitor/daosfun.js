@@ -14,7 +14,7 @@ async function monitorDaosFun(){
       if(daos !== list[1].result.data.daos[0].dao_mint){
         notify({
           type:'Group',
-          message: `<strong>监控通知</strong>\n监控平台：DAOS.FUN\n描述：疑是有新基金发布\n最新基金DAO地址：${list[1].result.data.daos[0].dao_mint}`
+          message: `监控通知\n监控平台：DAOS.FUN\n描述：疑是有新基金发布\n最新基金DAO地址：${list[1].result.data.daos[0].dao_mint}`
         })
       }else{
         log.info(`DAOS FUN 当前最新基金DAO地址：${list[1].result.data.daos[0].dao_mint}`)

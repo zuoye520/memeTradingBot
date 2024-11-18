@@ -10,7 +10,7 @@ let lastArticle = null;//缓存
 async function monitorMexc(){
   try {
     const list = await getMexcArticleList()
-    log.info('list[0]',list[0])
+    // log.info('list[0]',list[0])
     list[0] = list.find((item)=>item.top === false)
     log.info('list[0]',list[0])
     if(!lastArticle){
@@ -22,7 +22,7 @@ async function monitorMexc(){
         const url = `https://www.mexc.com/support/articles/${id}`;
         notify({
           type:'Group',
-          message: `<strong>监控通知</strong>\n监控平台：Mexc\n公告标题：${title}\n公告类型：MEXC测试公告监控\n公告时间：${time}`,
+          message: `监控通知\n监控平台：Mexc\n公告标题：${title}\n公告类型：MEXC测试公告监控\n公告时间：${time}`,
           inlineKeyboard:[
             [{ text: "🚀查看公告详情🚀", url: url }],
           ]

@@ -356,7 +356,6 @@ async function getMexcArticleList() {
       headers,
       method: 'get' 
     });
-    console.log('getMexcArticleList result:',response)
     if(response.msg !=='success') throw response
     return response.data.results;
   } catch (error) {

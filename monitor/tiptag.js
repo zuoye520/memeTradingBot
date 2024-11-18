@@ -22,7 +22,7 @@ async function monitorTipTag(){
         if(newsProject[index][0].token !== list[0].token){
           notify({
             type:'Group',
-            message: `<strong>监控通知</strong>\n监控平台：TipTag\n监控网络：${chain}\n描述：疑是有新项目发布\n项目信息：${list[0].name}`
+            message: `监控通知\n监控平台：TipTag\n监控网络：${chain}\n描述：疑是有新项目发布\n项目信息：${list[0].name}`
           })
         }else{
           log.info(`TipTag ${chain}网络,最新项目信息：${list[0].name}`)
