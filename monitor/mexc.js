@@ -10,9 +10,9 @@ let lastArticle = null;//缓存
 async function monitorMexc(){
   try {
     const list = await getMexcArticleList()
-    // log.info('list[0]',list[0])
-    list[0] = list.find((item)=>item.top === false)
     log.info('list[0]',list[0])
+    list[0] = list.find((item)=>item.top === false)
+    // log.info('list[0]',list[0])
     if(!lastArticle){
       lastArticle = list[0]
     }else{
