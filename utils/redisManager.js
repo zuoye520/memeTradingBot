@@ -5,8 +5,13 @@ dotenv.config();
 
 class RedisManager {
   constructor() {
+    // this.client = createClient({
+    //   url: process.env.REDIS_URL || 'redis://localhost:6379'
+    // });
     this.client = createClient({
-      url: process.env.REDIS_URL || 'redis://localhost:6379'
+        host: 'localhost', // Redis 服务器地址
+        port: 6379,        // Redis 服务器端口
+        db: 1             // 选择数据库编号（0到15）
     });
 
     this.client.on('error', (err) => console.log('Redis Client Error', err));
