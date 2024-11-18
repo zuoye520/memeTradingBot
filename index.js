@@ -8,6 +8,7 @@ import { insertData, selectData, updateData, deleteOldData } from './utils/db.js
 import redisManager from './utils/redisManager.js';
 import { initDatabase } from './utils/dbInit.js';
 import log from './utils/log.js';
+import wechatBot from './utils/wechatBot.js';
 
 import {
   transferSPLToken,
