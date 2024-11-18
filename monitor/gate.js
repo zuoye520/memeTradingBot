@@ -31,7 +31,7 @@ function initWebSocket() {
     });
 
     ws.on('message', (message) => {
-        log.info('Gate 接收到消息:', message);
+        // log.info('Gate 接收到消息:', message);
         const { event, result } = JSON.parse(message);
         
         // 重置心跳计时器

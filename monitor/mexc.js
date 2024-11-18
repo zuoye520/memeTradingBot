@@ -10,13 +10,13 @@ let lastArticle = null;//缓存
 async function monitorMexc(){
   try {
     const list = await getMexcArticleList()
-    log.info('list[0]',list[0])
-    list[0] = list.find((item)=>item.top === false)
-    // log.info('list[0]',list[0])
+    //根据ID降序排列
+    list.sort((a, b) => b.id - a.id);
+    log.info('Mexc 当前最新公告：',list[0])
     if(!lastArticle){
       lastArticle = list[0]
     }else{
-      const {id,title,top,updateTime:uTime} = list[0]
+      const {id,title,updateTime:uTime} = list[0]
       if(lastArticle.id != id){
         const time = moment(uTime).format("YYYY/MM/DD HH:mm:ss");
         const url = `https://www.mexc.com/support/articles/${id}`;
