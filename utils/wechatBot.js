@@ -54,10 +54,15 @@ class WechatBot {
     if (!this.ready) {
       throw new Error('Bot is still not ready after initialization');
     }
-    const { type = 'Admin', message } = params;
+    const { type = 'Admin', message, inlineKeyboard = [] } = params;
 
     const time = moment().format("YYYY/MM/DD HH:mm:ss");
-    let text = `${message}\n播报时间: ${time}`;
+
+    let urls = ``
+    inlineKeyboard.map((item)=>{
+      urls += `\n${item[0].text}：${item[0].url}`
+    })
+    let text = `${message}${urls}\n播报时间: ${time}`;
     let receiver = this.receivers[0];
     if(type == 'Group') receiver = this.receivers[1];
     try {
