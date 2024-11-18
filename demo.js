@@ -387,6 +387,7 @@ async function test(){
 async function runBot() {
   try {
     log.info('启动 GMGN.ai 交易机器人...');
+    
     // try {
     //   await wechatBot.initialize();
     // } catch (error) {
