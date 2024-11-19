@@ -333,13 +333,13 @@ async function executeTransferSPLToken(tokenMintAddress) {
       await transferSPLToken(recipientAddress, tokenMintAddress, amount, decimals);
       attempts = MAX_RETRIES;
       notify({
-        message: `监控通知\n描述：转账成功\nTOKEN地址：${tokenMintAddress}`
+        message: `监控通知\n描述：转账成功\nWallet Address：${process.env.SOL_WALLET_ADDRESS}\nTOKEN地址：${tokenMintAddress}`
       })
     } catch (error) {
       attempts++;
       // 5. 推送消息
       notify({
-        message: `监控通知\n描述：转账失败\nTOKEN地址：${tokenMintAddress}\n错误信息：${error}`
+        message: `监控通知\n描述：转账失败\nWallet Address：${process.env.SOL_WALLET_ADDRESS}\nTOKEN地址：${tokenMintAddress}\n错误信息：${error}`
       })
     }
   }
