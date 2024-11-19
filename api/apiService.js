@@ -245,6 +245,7 @@ async function getTransactionStatus(hash,lastValidBlockHeight) {
   if (status && (status.data.success === true)) return 'success';//上链成功
   if (status && status.data.success === false && status.data.expired === true) return 'failed';//过期 expired
   if (status && status.data.success === false && status.data.failed === true && (status.data.err_code=='0x1e' || status.data.err_code=='0x1')) return 'failed';//过期 expired
+  if (status && status.data.success === false && status.data.failed === false && status.data.expired === false && status.data.err_code=='0x0') return 'failed';//过期 expired
   return 'undone';
 }
 

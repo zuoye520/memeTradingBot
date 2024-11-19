@@ -20,7 +20,7 @@ async function monitorBinance(){
     
     const found = articleList.find(element => element.catalogId === 48);//catalogId:48 为上线新币或者Launchpool
     const list = found.articles;
-    log.info('list:',list)
+    // log.info('list:',list)
     //根据ID排序
     list.sort((a, b) => b.id - a.id);
     lastArticle = !lastArticle ? list[0] : lastArticle
