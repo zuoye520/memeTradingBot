@@ -16,28 +16,29 @@ function getArticleLink(title, code) {
 }
 async function monitorBinance(){
   try {
-    const list = await getBinanceArticleList()
-    // log.info('list:',list)
-    const found = list.find(element => element.catalogId === 48);//catalogId:48 为上线新币或者Launchpool
-    if(!lastArticle){
-      lastArticle = found.articles[0]
-    }else{
-      const {id,title,code,releaseDate} = found.articles[0]
-      if(lastArticle.id != id){
-        const time = moment(releaseDate).format("YYYY/MM/DD HH:mm:ss");
-        const link = getArticleLink(title,code);
-        notify({
-          type:'Group',
-          message: `监控通知\n监控平台：Binance\n公告标题：${title}\n公告类型：新币种上线\n公告时间：${time}`,
-          inlineKeyboard:[
-            [{ text: "🚀查看公告详情🚀", url: link }],
-          ]
-        })
-      }else{
-        // log.info(`Binance 当前最新公告：`,found.articles[0])
-      }
-      lastArticle = found.articles[0]
+    const articleList = await getBinanceArticleList()
+    
+    const found = articleList.find(element => element.catalogId === 48);//catalogId:48 为上线新币或者Launchpool
+    const list = found.articles;
+    log.info('list:',list)
+    //根据ID排序
+    list.sort((a, b) => b.id - a.id);
+    lastArticle = !lastArticle ? list[0] : lastArticle
+    const {id,title,code,releaseDate} = list[0]
+
+    if(lastArticle.id < id){
+      lastArticle = list[0]
+      const time = moment(releaseDate).format("YYYY/MM/DD HH:mm:ss");
+      const link = getArticleLink(title,code);
+      notify({
+        type:'Group',
+        message: `监控通知\n监控平台：Binance\n公告标题：${title}\n公告类型：新币种上线\n公告时间：${time}`,
+        inlineKeyboard:[
+          [{ text: "🚀查看公告详情🚀", url: link }],
+        ]
+      })
     }
+    // log.info(`Binance 当前最新公告：`,lastArticle)
 
   } catch (error) {
     log.error('Binance 监控出现异常:',error)

@@ -44,13 +44,6 @@ process.env.SOL_PRIVATE_KEY = decryptPrivateKey();
  * 检查并执行买入操作
  */
 async function checkAndExecuteBuy() {
-  const lockKey = 'check_buy_lock';
-  const lockSet = await redisManager.setTimeLock(lockKey, 20);//流程20秒
-  if (!lockSet) {
-    log.info('checkAndExecuteBuy 锁已存在，操作被阻止');
-    return;
-  } 
-  
   try {
     // 检查 SOL 余额
     const solBalance = await getSolanaBalance(process.env.SOL_WALLET_ADDRESS);
@@ -96,7 +89,6 @@ async function checkAndExecuteBuy() {
         };
         try {
           const tradeResult =process.env.DEFAUT_SWAP =='GMGN' ? await executeSolanaTrade(tradeData) :await executeRaydiumSwap(tradeData);
-
 
           log.info(`已为代币 ${token.symbol} 执行交易，结果:`, tradeResult);
           if(!tradeResult || !tradeResult.data || !tradeResult.data.hash) {
@@ -153,8 +145,7 @@ async function checkAndExecuteBuy() {
     log.error('交易机器人周期出错:', error);
   } finally{
     log.info('checkAndExecuteBuy finally');
-    //删除流程锁
-    await redisManager.del(lockKey);
+    return;
   }
   
 }
@@ -163,12 +154,7 @@ async function checkAndExecuteBuy() {
  * 检查并执行卖出操作
  */
 async function checkAndExecuteSell() {
-  const lockKey = 'check_sell_lock';
-  const lockSet = await redisManager.setTimeLock(lockKey, 20);//流程20秒
-  if (!lockSet) {
-    log.info('checkAndExecuteSell 锁已存在，操作被阻止');
-    return;
-  } 
+  
   try {
     const walletAddress = process.env.SOL_WALLET_ADDRESS;
     const holdings = await getWalletHoldings(walletAddress);
@@ -285,8 +271,7 @@ async function checkAndExecuteSell() {
     log.error('检查并执行卖出操作失败:', error);
   } finally{
     log.info('checkAndExecuteSell finally');
-    //删除流程锁
-    await redisManager.del(lockKey);
+    return;
   }
 }
 
@@ -296,12 +281,6 @@ async function checkAndExecuteSell() {
  * 检查待处理交易的状态
  */
 async function checkPendingTransactions() {
-  const lockKey = 'check_pending_lock';
-  const lockSet = await redisManager.setTimeLock(lockKey, 20);//流程20秒
-  if (!lockSet) {
-    log.info('checkPendingTransactions 锁已存在，操作被阻止');
-    return;
-  } 
   try {
     const pendingTransactions = await selectData('trade_records', { status: 'PENDING' });
 
@@ -333,8 +312,7 @@ async function checkPendingTransactions() {
     log.error('Error checking pending transactions:', error);
   } finally{
     log.info('checkPendingTransactions finally')
-    //删除流程锁
-    await redisManager.del(lockKey);
+    return;
   }
   
 }
@@ -394,36 +372,52 @@ async function runBot() {
   if(process.env.WECHAT_NOTIFY === 'ON') await wechatBot.initialize();// 初始化微信Bot
 
   // meme交易定时任务
-  // setInterval(checkAndExecuteBuy, 1000 * 3); // 每10秒运行一次
-  // setInterval(checkAndExecuteSell, 1000 * 5); // 每10秒检查一次
-  // setInterval(checkPendingTransactions, 1000 * 10); // 每10秒检查一次待处理交易
-  // setInterval(cleanupOldData, 1000 * 60 * 10); // 每10分钟运行一次清理任务
-  //监控定时任务
-  // setInterval(monitorDaosFun, 1000 * 10); // 每10秒运行一次任务
-  // setInterval(monitorTipTag, 1000 * 10); // 每10秒运行一次任务
-  // setInterval(monitorBinance, 1000 * 10); // 每10秒运行一次任务
-  // setInterval(monitorUpbit, 1000 * 10); // 每10秒运行一次任务
-
-  // meme交易定时任务
   schedule.scheduleJob('checkAndExecuteBuy-task', `*/3 * * * * *`, async () => {
+    const lockKey = 'check_buy_lock';
     try {
+      const lockSet = await redisManager.setTimeLock(lockKey, 20);//流程20秒
+      if (!lockSet) {
+        log.info('checkAndExecuteBuy 锁已存在，操作被阻止');
+        return;
+      } 
       await checkAndExecuteBuy();
     } catch (error) {
       log.error('checkAndExecuteBuy task error:', error);
+    } finally{
+      //删除流程锁
+      await redisManager.del(lockKey);
     }
   });
   schedule.scheduleJob('checkAndExecuteSell-task', `*/5 * * * * *`, async () => {
+    const lockKey = 'check_sell_lock';
     try {
+      const lockSet = await redisManager.setTimeLock(lockKey, 20);//流程20秒
+      if (!lockSet) {
+        log.info('checkAndExecuteSell 锁已存在，操作被阻止');
+        return;
+      } 
       await checkAndExecuteSell();
     } catch (error) {
       log.error('checkAndExecuteSell task error:', error);
+    } finally{
+      //删除流程锁
+      await redisManager.del(lockKey);
     }
   });
   schedule.scheduleJob('checkPendingTransactions-task', `*/10 * * * * *`, async () => {
+    const lockKey = 'check_pending_lock';
     try {
+      const lockSet = await redisManager.setTimeLock(lockKey, 20);//流程20秒
+      if (!lockSet) {
+        log.info('checkPendingTransactions 锁已存在，操作被阻止');
+        return;
+      } 
       await checkPendingTransactions();
     } catch (error) {
       log.error('checkPendingTransactions task error:', error);
+    } finally{
+      //删除流程锁
+      await redisManager.del(lockKey);
     }
   });
   //每10分钟执行一次
@@ -434,7 +428,6 @@ async function runBot() {
       log.error('cleanupOldData task error:', error);
     }
   });
-
 
   // monitorDaosFun监控任务,每X秒执行一次
   schedule.scheduleJob('monitorDaosFun-task', `*/10 * * * * *`, async () => {

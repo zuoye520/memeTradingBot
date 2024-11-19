@@ -31,7 +31,7 @@ function initWebSocket() {
     });
 
     ws.on('message', (message) => {
-        // log.info('Gate 接收到消息:', message);
+        log.info('Gate 接收到消息:', message);
         const { event, result } = JSON.parse(message);
         
         // 重置心跳计时器
@@ -94,25 +94,20 @@ function stopHeartbeat() {
 
 function msNotify(data){
   try {
-    if(!lastArticle){
-      lastArticle = data
-    }else{
-      const {title,origin_url:url,published_at:pTime} = data
-      console.log('data:',data)
-      if(lastArticle.origin_url != url){
-        const time = moment(pTime*1000).format("YYYY/MM/DD HH:mm:ss");
-        notify({
-          type:'Admin',//Group
-          message: `监控通知\n监控平台：Gate\n公告标题：${title}\n公告类型：新币种上线\n推送时间：${time}`,
-          inlineKeyboard:[
-            [{ text: "🚀查看公告详情🚀", url: url }],
-          ]
-        })
-      }else{
-        // log.info(`Gate 当前最新公告：`,result)
-      }
-      lastArticle = data
+    lastArticle = !lastArticle ? data : lastArticle
+    const {title,origin_url:url,published_at:pTime} = data
+    if(lastArticle.origin_url != url &&lastArticle.published_at < pTime){
+      lastArticle = data;
+      const time = moment(pTime*1000).format("YYYY/MM/DD HH:mm:ss");
+      notify({
+        type:'Admin',//Group
+        message: `监控通知\n监控平台：Gate\n公告标题：${title}\n公告类型：新币种上线\n推送时间：${time}`,
+        inlineKeyboard:[
+          [{ text: "🚀查看公告详情🚀", url: url }],
+        ]
+      })
     }
+    // log.info(`Gate 当前最新公告：`,lastArticle)
   } catch (error) {
     log.error('Gate 监控出现异常:',error)
     notify({

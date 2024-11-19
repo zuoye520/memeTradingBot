@@ -9,26 +9,27 @@ let lastArticle = null;//缓存
 async function monitorUpbit(){
   try {
     const list = await getUpbitArticleList()
-    // console.log('list:',list)
-    if(!lastArticle){
+    //根据ID降序排列
+    list.sort((a, b) => b.id - a.id);
+    lastArticle = !lastArticle ? list[0] : lastArticle
+
+    const {id,title,listed_at} = list[0]
+    // const time1 = new Date(lastArticle.listed_at);
+    // const time2 = new Date(listed_at);
+    if(lastArticle.id < id){
       lastArticle = list[0]
-    }else{
-      const {id,title,listed_at} = list[0]
-      if(lastArticle.id != id){
-        const time = moment(listed_at).format("YYYY/MM/DD HH:mm:ss");
-        const link = `https://upbit.com/service_center/notice?id=${id}`;
-        notify({
-          type:'Group',
-          message: `监控通知\n监控平台：Upbit(韩国站)\n公告标题：${title}\n公告类型：新币种上线\n公告时间：${time}`,
-          inlineKeyboard:[
-            [{ text: "🚀查看公告详情🚀", url: link }],
-          ]
-        })
-      }else{
-        // log.info(`Upbit 当前最新公告：`,list[0])
-      }
-      lastArticle = list[0]
+      const time = moment(listed_at).format("YYYY/MM/DD HH:mm:ss");
+      const link = `https://upbit.com/service_center/notice?id=${id}`;
+      notify({
+        type:'Group',
+        message: `监控通知\n监控平台：Upbit(韩国站)\n公告标题：${title}\n公告类型：新币种上线\n公告时间：${time}`,
+        inlineKeyboard:[
+          [{ text: "🚀查看公告详情🚀", url: link }],
+        ]
+      })
+      
     }
+    // log.info(`Upbit 当前最新公告：`,lastArticle)
 
   } catch (error) {
     log.error('Upbit 监控出现异常:',error)
