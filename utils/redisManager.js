@@ -8,6 +8,7 @@ class RedisManager {
     // this.client = createClient({
     //   url: process.env.REDIS_URL || 'redis://localhost:6379'
     // });
+    this.prefix = process.env.REDIS_PREFIX || '' //key 前缀
     this.client = createClient({
         host: 'localhost', // Redis 服务器地址
         port: 6379,        // Redis 服务器端口
@@ -31,36 +32,36 @@ class RedisManager {
 
   async set(key, value, expiration = 3600) {
     await this.connect();
-    await this.client.set(key, JSON.stringify(value), {
+    await this.client.set(this.prefix+key, JSON.stringify(value), {
       EX: expiration
     });
   }
 
   async get(key) {
     await this.connect();
-    const value = await this.client.get(key);
+    const value = await this.client.get(this.prefix+key);
     return value ? JSON.parse(value) : null;
   }
 
   async del(key) {
     await this.connect();
-    await this.client.del(key);
+    await this.client.del(this.prefix+key);
   }
 
   async setHash(key, field, value) {
     await this.connect();
-    await this.client.hSet(key, field, JSON.stringify(value));
+    await this.client.hSet(this.prefix+key, field, JSON.stringify(value));
   }
 
   async getHash(key, field) {
     await this.connect();
-    const value = await this.client.hGet(key, field);
+    const value = await this.client.hGet(this.prefix+key, field);
     return value ? JSON.parse(value) : null;
   }
 
   async getAllHash(key) {
     await this.connect();
-    const hash = await this.client.hGetAll(key);
+    const hash = await this.client.hGetAll(this.prefix+key);
     Object.keys(hash).forEach(field => {
       hash[field] = JSON.parse(hash[field]);
     });
@@ -69,13 +70,13 @@ class RedisManager {
 
   async delHash(key, field) {
     await this.connect();
-    await this.client.hDel(key, field);
+    await this.client.hDel(this.prefix+key, field);
   }
 
   // 新增：设置时间锁,duration:60 秒
   async setTimeLock(key, duration) {
     await this.connect();
-    const result = await this.client.set(key, 'locked', {
+    const result = await this.client.set(this.prefix+key, 'locked', {
       NX: true,
       EX: duration
     });
@@ -85,7 +86,7 @@ class RedisManager {
   // 新增：检查时间锁是否存在
   async checkTimeLock(key) {
     await this.connect();
-    const value = await this.client.get(key);
+    const value = await this.client.get(this.prefix+key);
     return value !== null;
   }
 }
