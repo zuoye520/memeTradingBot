@@ -372,7 +372,7 @@ async function runBot() {
 
   // meme交易定时任务
   schedule.scheduleJob('checkAndExecuteBuy-task', `*/3 * * * * *`, async () => {
-    const lockKey = 'check_buy_lock';
+    const lockKey = 'zz_check_buy_lock';
     const lockSet = await redisManager.setTimeLock(lockKey, 10);//流程10秒
     if (!lockSet) {
       log.info('checkAndExecuteBuy 锁已存在，操作被阻止');
@@ -392,7 +392,7 @@ async function runBot() {
     }
   });
   schedule.scheduleJob('checkAndExecuteSell-task', `*/5 * * * * *`, async () => {
-    const lockKey = 'check_sell_lock';
+    const lockKey = 'zz_check_sell_lock';
     const lockSet = await redisManager.setTimeLock(lockKey, 10);//流程10秒
     if (!lockSet) {
       log.info('checkAndExecuteSell 锁已存在，操作被阻止');
@@ -412,7 +412,7 @@ async function runBot() {
     }
   });
   schedule.scheduleJob('checkPendingTransactions-task', `*/10 * * * * *`, async () => {
-    const lockKey = 'check_pending_lock';
+    const lockKey = 'zz_check_pending_lock';
     const lockSet = await redisManager.setTimeLock(lockKey, 10);//流程10秒
     if (!lockSet) {
       log.info('checkPendingTransactions 锁已存在，操作被阻止');
