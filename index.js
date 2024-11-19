@@ -125,13 +125,13 @@ async function checkAndExecuteBuy() {
           log.error(`为代币 ${token.symbol} 执行交易失败:`, tradeError);
           notify({
             type:'Error',
-            message: `监控通知\n描述：执行交易失败,${token.symbol}\nTOKEN地址：${token.address}\n错误信息：${tradeError}`
+            message: `监控通知\n描述：执行交易失败,${token.symbol}\nWallet Address：${process.env.SOL_WALLET_ADDRESS}\nTOKEN地址：${token.address}\n错误信息：${tradeError}`
           })
         }
         // 6. 推送消息
         notify({
           type:'Admin',
-          message: `监控通知\n描述：💰执行买入💰\nSymbol：${token.symbol}\nToken Address：${token.address}\n买入数量：${process.env.SOL_TRADE_AMOUNT} SOL`,
+          message: `监控通知\n描述：💰执行买入💰\nWallet Address：${process.env.SOL_WALLET_ADDRESS}\nSymbol：${token.symbol}\nToken Address：${token.address}\n买入数量：${process.env.SOL_TRADE_AMOUNT} SOL`,
           inlineKeyboard:[
             [{ text: "行情K线", url: `https://gmgn.ai/sol/token/${token.address}` }],
             [{ text: "交易记录", url: `https://gmgn.ai/sol/address/${process.env.SOL_WALLET_ADDRESS}` }]
@@ -243,7 +243,7 @@ async function checkAndExecuteSell() {
             // 5. 推送消息
             notify({
               type:'Admin',
-              message: `监控通知\n描述：🎉执行卖出🎉\nSymbol：${symbol}\nToken Address：${address}\n卖出数量：${sellAmount.toFixed(0)} ${symbol}\n收益率：${profitPercentage.toFixed(2)}%`,
+              message: `监控通知\n描述：🎉执行卖出🎉\nWallet Address：${process.env.SOL_WALLET_ADDRESS}\nSymbol：${symbol}\nToken Address：${address}\n卖出数量：${sellAmount.toFixed(0)} ${symbol}\n收益率：${profitPercentage.toFixed(2)}%`,
               inlineKeyboard:[
                 [{ text: "行情K线", url: `https://gmgn.ai/sol/token/${address}` }],
                 [{ text: "交易记录", url: `https://gmgn.ai/sol/address/${process.env.SOL_WALLET_ADDRESS}` }]
@@ -261,7 +261,7 @@ async function checkAndExecuteSell() {
           if(JSON.stringify(tradeError).indexOf('amounts must greater than zero') < 0){
             notify({
               type:'Error',
-              message: `监控通知\n描述：执行交易失败,${symbol}\nTOKEN地址：${address}\n错误信息：${tradeError}`
+              message: `监控通知\n描述：执行交易失败,${symbol}\nWallet Address：${process.env.SOL_WALLET_ADDRESS}\nTOKEN地址：${address}\n错误信息：${tradeError}`
             })
           }
         }
