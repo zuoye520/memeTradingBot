@@ -96,7 +96,7 @@ import {
       };
     } catch (error) {
       log.error('SPL Token 转账失败:', error);
-      if(error.indexOf('TokenAccountNotFoundError') > -1){
+      if(JSON.stringify(error).indexOf('TokenAccountNotFoundError') > -1){
         throw error;
       }else{
         return true;
