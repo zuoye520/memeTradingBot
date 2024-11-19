@@ -365,6 +365,68 @@ async function getMexcArticleList() {
   }
 }
 
+/**
+ * Bybit 公告
+ * @returns 
+ */
+async function getBybitArticleList() {
+  
+  try {
+    // 构建 API 请求 URL
+    let url = `https://api.bybit.com/v5/announcements/index?locale=zh-TW&page=1&limit=10&type=new_crypto`; 
+    console.log('getBybitArticleList:',url)
+    const response = await sendRequest(url, { method: 'get' });
+    if(response.retCode !==0) throw response
+    return response.result.list;
+  } catch (error) {
+    console.error('getBybitArticleList Error:', error);
+    throw error;
+  }
+}
+/**
+ * bithumb 公告
+ * @returns 
+ */
+async function getBithumbArticleList() {
+  try {
+    const headers = {
+      "Accept": "*/*",
+      "Accept-Encoding":"gzip, deflate, br, zstd",
+      "Accept-Language":"zh-CN,zh;q=0.9,en;q=0.8",
+      "Cache-Control":"no-cache",
+      "Pragma":"no-cache",
+      "Priority":"u=1, i",
+      "Sec-Ch-Ua":'"Chromium";v="130", "Google Chrome";v="130", "Not?A_Brand";v="99"',
+      "Sec-Ch-Ua-Mobile":"?0",
+      "Sec-Ch-Ua-Platform":"macOS",
+      "Sec-Fetch-Mode":"cors",
+      "Sec-Fetch-Site": "same-site",
+      "Accept-Language": "zh-CN,zh-Hans;q=0.9",
+      // "Content-Type": "application/json",
+      // Content-Length: 55
+      "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+      "Referer": "https://feed.bithumb.com/",
+      // "Connection": "keep-alive",
+      // "Sec-Fetch-Dest": "empty",
+      "x-nextjs-data":1,
+      // "Cookie":"cf_clearance=4xTGx0CVRL_afPmZ1B.bpwFkfmRatbhsVRc82rKe.wA-1732013363-1.2.1.1-CN.2pbuZBHMAuNGWRifS3F9dzlvNtAYA.RsMFbnjU8s3gqqP11em02gEj334dN65_b7._QoPFAgSbhTIIjozIB4lHShVaRN2lqzLLadyNsAcKCiuPQRqxhtrTbY8sZl52KrLPxwAL7fgn0UTkVLYXetbsa4dK7GXZ3OtMHgpvdJgMNgFU2qdq9EMiQ2KEekv3ZnbbOhOND.D6IfeMwMgA9.BAE2_Mz5J8ixyd.L_QOG64vNGAVhddhfSdTipu.079z5wkWV.fIjjIR.y0q55q8x4W5ouLTI_RJ5oPukHZkV33UWlQmtcXniQ0No2jk0CewLe29oJXoEngoJe.z7OwpRtFRLnu1L_D2fdAqnKpJzciENTd2ieW12fp_rpL6adi3ozOj6MvOWQxi.6sadspQ"
+  };
+    // 构建 API 请求 URL
+    let url = `https://feed.bithumb.com/_next/data/J1C-AbceZq-4_uJ_HlV-C/notice.json?category=9&page=1`;
+    url = 'https://m-feed.bithumb.com/notice' 
+    console.log('getBithumbArticleList:',url)
+    const response = await sendRequest(url, { 
+      headers,
+      method: 'get' 
+    });
+    if(!response.pageProps || response.pageProps.status != 'ok') throw response
+    return response.pageProps.noticeList;
+  } catch (error) {
+    console.error('getBithumbArticleList Error:', error);
+    throw error;
+  }
+}
+
 export {
   transferSPLToken,
   checkSPLTokenAccount,
@@ -382,5 +444,7 @@ export {
   getTipTagNewList,
   getBinanceArticleList,
   getUpbitArticleList,
-  getMexcArticleList
+  getMexcArticleList,
+  getBybitArticleList,
+  getBithumbArticleList
 };

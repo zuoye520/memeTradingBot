@@ -30,6 +30,8 @@ import { monitorUpbit } from './monitor/upbit.js';
 import { monitorOkx } from './monitor/okx.js';
 import { monitorGate } from './monitor/gate.js';
 import { monitorMexc } from './monitor/mexc.js';
+import { monitorBybit } from './monitor/bybit.js';
+import { monitorBithumb } from './monitor/bithumb.js';
 
 
 dotenv.config();
@@ -393,6 +395,8 @@ async function runBot() {
     // } catch (error) {
     //   log.error('Failed to initialize WeChat bot:', error);
     // }
+    // monitorBithumb()
+    // monitorBybit()
     // monitorTipTag()
     // monitorMexc()
     // monitorGate()

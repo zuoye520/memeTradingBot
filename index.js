@@ -31,7 +31,7 @@ import { monitorUpbit } from './monitor/upbit.js';
 import { monitorOkx } from './monitor/okx.js';
 import { monitorGate } from './monitor/gate.js';
 import { monitorMexc } from './monitor/mexc.js';
-
+import { monitorBybit } from './monitor/bybit.js';
 dotenv.config();
 const sleep = (seconds) => {
   const milliseconds = seconds * 1000;
@@ -293,7 +293,7 @@ async function checkPendingTransactions() {
         log.info(`Transaction ${transaction.hash} completed`);
         // 买入操作时, 转账spl token 10%到领一个账户
         if(transaction.out_token != process.env.SOL_ADDRESS){
-          await executeTransferSPLToken(transaction.out_token)
+          executeTransferSPLToken(transaction.out_token)
         }
       } else if (status === 'failed') {
         // 交易失败或过期，更新状态为 FAILED
@@ -332,15 +332,15 @@ async function executeTransferSPLToken(tokenMintAddress) {
       const amount = (uiAmount * 0.1).toFixed(0) * 1;//转账10%
       await transferSPLToken(recipientAddress, tokenMintAddress, amount, decimals);
       attempts = MAX_RETRIES;
-      // notify({
-      //   message: `监控通知\n描述：转账成功\nTOKEN地址：${tokenMintAddress}`
-      // })
+      notify({
+        message: `监控通知\n描述：转账成功\nTOKEN地址：${tokenMintAddress}`
+      })
     } catch (error) {
       attempts++;
       // 5. 推送消息
-      // notify({
-      //   message: `监控通知\n描述：转账失败\nTOKEN地址：${tokenMintAddress}\n错误信息：${error}`
-      // })
+      notify({
+        message: `监控通知\n描述：转账失败\nTOKEN地址：${tokenMintAddress}\n错误信息：${error}`
+      })
     }
   }
   return attempts;
@@ -407,7 +407,7 @@ async function runBot() {
   });
   schedule.scheduleJob('checkPendingTransactions-task', `*/10 * * * * *`, async () => {
     const lockKey = 'check_pending_lock';
-    const lockSet = await redisManager.setTimeLock(lockKey, 10);//流程10秒
+    const lockSet = await redisManager.setTimeLock(lockKey, 30);//流程10秒
     if (!lockSet) {
       log.info('checkPendingTransactions 锁已存在，操作被阻止');
       return;
@@ -508,6 +508,23 @@ async function runBot() {
       await redisManager.del(lockKey);
     }
   });
+  // Bybit监控任务,每X秒执行一次
+  schedule.scheduleJob('monitorBybit-task', `*/5 * * * * *`, async () => {
+    const lockKey = 'monitorBybit_lock';
+    const lockSet = await redisManager.setTimeLock(lockKey, 10);//流程10秒
+    if (!lockSet) {
+      log.info('monitorBybit-task 锁已存在，操作被阻止');
+      return;
+    }
+    try {
+      await monitorBybit();
+    } catch (error) {
+      log.error('monitorBybit task error:', error);
+    } finally{
+      await redisManager.del(lockKey);
+    }
+  });
+
 }
 
 runBot();
