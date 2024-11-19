@@ -379,9 +379,11 @@ async function runBot() {
       return;
     } 
     try {
+      log.info('checkAndExecuteBuy start')
       console.time("checkAndExecuteBuy executionTime");
       await checkAndExecuteBuy();
       console.timeEnd("checkAndExecuteBuy executionTime");
+      log.info('checkAndExecuteBuy end')
     } catch (error) {
       log.error('checkAndExecuteBuy task error:', error);
     } finally{
@@ -397,15 +399,16 @@ async function runBot() {
       return;
     } 
     try {
+      log.info('checkAndExecuteSell start')
       console.time("checkAndExecuteSell executionTime");
       await checkAndExecuteSell();
       console.timeEnd("checkAndExecuteSell executionTime");
+      log.info('checkAndExecuteSell end')
     } catch (error) {
       log.error('checkAndExecuteSell task error:', error);
     } finally{
       //删除流程锁
       await redisManager.del(lockKey);
-      
     }
   });
   schedule.scheduleJob('checkPendingTransactions-task', `*/10 * * * * *`, async () => {
