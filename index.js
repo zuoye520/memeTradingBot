@@ -375,55 +375,57 @@ async function runBot() {
   schedule.scheduleJob('checkAndExecuteBuy-task', `*/3 * * * * *`, async () => {
     const lockKey = 'check_buy_lock';
     try {
-      const lockSet = await redisManager.setTimeLock(lockKey, 20);//流程20秒
+      const lockSet = await redisManager.setTimeLock(lockKey, 10);//流程10秒
       if (!lockSet) {
         log.info('checkAndExecuteBuy 锁已存在，操作被阻止');
         return;
       } 
       console.time("checkAndExecuteBuy executionTime");
       await checkAndExecuteBuy();
-      console.timeEnd("checkAndExecuteBuy executionTime");
     } catch (error) {
       log.error('checkAndExecuteBuy task error:', error);
     } finally{
       //删除流程锁
       await redisManager.del(lockKey);
+      console.timeEnd("checkAndExecuteBuy executionTime");
     }
   });
   schedule.scheduleJob('checkAndExecuteSell-task', `*/5 * * * * *`, async () => {
     const lockKey = 'check_sell_lock';
     try {
-      const lockSet = await redisManager.setTimeLock(lockKey, 20);//流程20秒
+      const lockSet = await redisManager.setTimeLock(lockKey, 10);//流程10秒
       if (!lockSet) {
         log.info('checkAndExecuteSell 锁已存在，操作被阻止');
         return;
       } 
       console.time("checkAndExecuteSell executionTime");
       await checkAndExecuteSell();
-      console.timeEnd("checkAndExecuteSell executionTime");
+      
     } catch (error) {
       log.error('checkAndExecuteSell task error:', error);
     } finally{
       //删除流程锁
       await redisManager.del(lockKey);
+      console.timeEnd("checkAndExecuteSell executionTime");
     }
   });
   schedule.scheduleJob('checkPendingTransactions-task', `*/10 * * * * *`, async () => {
     const lockKey = 'check_pending_lock';
     try {
-      const lockSet = await redisManager.setTimeLock(lockKey, 20);//流程20秒
+      const lockSet = await redisManager.setTimeLock(lockKey, 10);//流程10秒
       if (!lockSet) {
         log.info('checkPendingTransactions 锁已存在，操作被阻止');
         return;
       } 
       console.time("checkPendingTransactions executionTime");
       await checkPendingTransactions();
-      console.timeEnd("checkPendingTransactions executionTime");
+      
     } catch (error) {
       log.error('checkPendingTransactions task error:', error);
     } finally{
       //删除流程锁
       await redisManager.del(lockKey);
+      console.timeEnd("checkPendingTransactions executionTime");
     }
   });
   //每10分钟执行一次
@@ -435,62 +437,62 @@ async function runBot() {
     }
   });
 
-  // // monitorDaosFun监控任务,每X秒执行一次
-  // schedule.scheduleJob('monitorDaosFun-task', `*/10 * * * * *`, async () => {
-  //   try {
-  //     await monitorDaosFun();
-  //   } catch (error) {
-  //     log.error('monitorDaosFun task error:', error);
-  //   }
-  // });
-  // // tipTag监控任务,每X秒执行一次
-  // schedule.scheduleJob('monitorTipTag-task', `*/10 * * * * *`, async () => {
-  //   try {
-  //     await monitorTipTag();
-  //   } catch (error) {
-  //     log.error('monitorTipTag task error:', error);
-  //   }
-  // });
-  // // Binance监控任务,每X秒执行一次
-  // schedule.scheduleJob('monitorBinance-task', `*/3 * * * * *`, async () => {
-  //   const lockKey = 'monitorBinance_lock';
-  //   try {
-  //     const lockSet = await redisManager.setTimeLock(lockKey, 10);//流程10秒
-  //     if (!lockSet) {
-  //       log.info('monitorBinance-task 锁已存在，操作被阻止');
-  //       return;
-  //     } 
-  //     await monitorBinance();
-  //   } catch (error) {
-  //     log.error('monitorBinance task error:', error);
-  //   } finally{
-  //     await redisManager.del(lockKey);
-  //   }
-  // });
-  // // Upbit监控任务,每X秒执行一次
-  // schedule.scheduleJob('monitorUpbit-task', `*/10 * * * * *`, async () => {
-  //   try {
-  //     await monitorUpbit();
-  //   } catch (error) {
-  //     log.error('monitorUpbit task error:', error);
-  //   }
-  // });
-  // // OKX监控任务,每X秒执行一次
-  // schedule.scheduleJob('monitorOkx-task', `*/3 * * * * *`, async () => {
-  //   const lockKey = 'monitorOkx_lock';
-  //   try {
-  //     const lockSet = await redisManager.setTimeLock(lockKey, 10);//流程10秒
-  //     if (!lockSet) {
-  //       log.info('monitorOkx-task 锁已存在，操作被阻止');
-  //       return;
-  //     } 
-  //     await monitorOkx();
-  //   } catch (error) {
-  //     log.error('monitorOkx task error:', error);
-  //   } finally{
-  //     await redisManager.del(lockKey);
-  //   }
-  // });
+  // monitorDaosFun监控任务,每X秒执行一次
+  schedule.scheduleJob('monitorDaosFun-task', `*/10 * * * * *`, async () => {
+    try {
+      await monitorDaosFun();
+    } catch (error) {
+      log.error('monitorDaosFun task error:', error);
+    }
+  });
+  // tipTag监控任务,每X秒执行一次
+  schedule.scheduleJob('monitorTipTag-task', `*/10 * * * * *`, async () => {
+    try {
+      await monitorTipTag();
+    } catch (error) {
+      log.error('monitorTipTag task error:', error);
+    }
+  });
+  // Binance监控任务,每X秒执行一次
+  schedule.scheduleJob('monitorBinance-task', `*/3 * * * * *`, async () => {
+    const lockKey = 'monitorBinance_lock';
+    try {
+      const lockSet = await redisManager.setTimeLock(lockKey, 10);//流程10秒
+      if (!lockSet) {
+        log.info('monitorBinance-task 锁已存在，操作被阻止');
+        return;
+      } 
+      await monitorBinance();
+    } catch (error) {
+      log.error('monitorBinance task error:', error);
+    } finally{
+      await redisManager.del(lockKey);
+    }
+  });
+  // Upbit监控任务,每X秒执行一次
+  schedule.scheduleJob('monitorUpbit-task', `*/10 * * * * *`, async () => {
+    try {
+      await monitorUpbit();
+    } catch (error) {
+      log.error('monitorUpbit task error:', error);
+    }
+  });
+  // OKX监控任务,每X秒执行一次
+  schedule.scheduleJob('monitorOkx-task', `*/3 * * * * *`, async () => {
+    const lockKey = 'monitorOkx_lock';
+    try {
+      const lockSet = await redisManager.setTimeLock(lockKey, 10);//流程10秒
+      if (!lockSet) {
+        log.info('monitorOkx-task 锁已存在，操作被阻止');
+        return;
+      } 
+      await monitorOkx();
+    } catch (error) {
+      log.error('monitorOkx task error:', error);
+    } finally{
+      await redisManager.del(lockKey);
+    }
+  });
   // // Gate监控任务,执行一次
   // monitorGate()
 
