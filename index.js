@@ -34,6 +34,7 @@ import { monitorOkx } from './monitor/okx.js';
 import { monitorGate } from './monitor/gate.js';
 import { monitorMexc } from './monitor/mexc.js';
 import { monitorBybit } from './monitor/bybit.js';
+import { monitorBitget } from './monitor/bitget.js';
 dotenv.config();
 
 // 在程序开始时解密私钥
@@ -521,6 +522,22 @@ async function runBot() {
       await monitorBybit();
     } catch (error) {
       log.error('monitorBybit task error:', error);
+    } finally{
+      await redisManager.del(lockKey);
+    }
+  });
+  // Bitget监控任务,每X秒执行一次
+  schedule.scheduleJob('monitorBitget-task', `*/5 * * * * *`, async () => {
+    const lockKey = 'monitorBitget_lock';
+    const lockSet = await redisManager.setTimeLock(lockKey, 10);//流程10秒
+    if (!lockSet) {
+      log.info('monitorBitget-task 锁已存在，操作被阻止');
+      return;
+    }
+    try {
+      await monitorBitget();
+    } catch (error) {
+      log.error('monitorBitget task error:', error);
     } finally{
       await redisManager.del(lockKey);
     }
