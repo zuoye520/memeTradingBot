@@ -11,6 +11,7 @@ import log from './utils/log.js';
 import wechatBot from './utils/wechatBot.js';
 import {
   transferSPLToken,
+  getWalletInfo,
   getSolanaBalance,
   getSolanaTokenBalance,
   getPopularList,
@@ -389,7 +390,9 @@ async function test(){
 async function runBot() {
   try {
     log.info('启动 GMGN.ai 交易机器人...');
-    
+    // 检查 SOL 余额
+    // const solBalance = await getWalletInfo(process.env.SOL_WALLET_ADDRESS);
+    // log.info('solBalance:',solBalance)
     // try {
     //   await wechatBot.initialize();
     // } catch (error) {

@@ -13,6 +13,7 @@ import wechatBot from './utils/wechatBot.js';
 import {
   transferSPLToken,
   getSolanaBalance,
+  getWalletInfo,
   getSolanaTokenBalance,
   getPopularList,
   getWalletHoldings,
@@ -46,7 +47,8 @@ process.env.SOL_PRIVATE_KEY = decryptPrivateKey();
 async function checkAndExecuteBuy() {
   try {
     // 检查 SOL 余额
-    const solBalance = await getSolanaBalance(process.env.SOL_WALLET_ADDRESS);
+    // const solBalance = await getSolanaBalance(process.env.SOL_WALLET_ADDRESS);
+    const {sol_balance:solBalance} = await getWalletInfo(process.env.SOL_WALLET_ADDRESS);
     // const requiredBalance = parseFloat(process.env.SOL_TRADE_AMOUNT) + parseFloat(process.env.SOL_PRIORITY_FEE);
     log.info(`SOL 当前余额: ${solBalance} SOL`);
     const solMinBalance = process.env.SOL_MIN_BALANCE || 0

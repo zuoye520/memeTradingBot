@@ -118,6 +118,23 @@ async function getWalletHoldings(walletAddress) {
 }
 
 /**
+ * 获取钱包信息
+ * @param {string} walletAddress - 钱包地址
+ * @returns {Promise<Array>} - 持仓盈亏信息数组
+ */
+async function getWalletInfo(walletAddress) {
+  try {
+    const url = `${GMGN_API_URL}/defi/quotation/v1/smartmoney/sol/walletNew/${walletAddress}`;
+    console.log('getGmgnWalletInfo:',url)
+    const response = await sendRequest(url, { method: 'get' });
+    if (response.code !== 0) throw response
+    return response.data;
+  } catch (error) {
+    console.error('获取钱包信息出错:', error);
+    throw error
+  }
+}
+/**
  * gmgn swap API
  * @param {*} tradeParams 
  * @returns 
@@ -435,6 +452,7 @@ export {
   getNewPoolList,
   getPopularList,
   getWalletHoldings,
+  getWalletInfo,
   gmgnTokens,
   executeSolanaTrade,
   executeRaydiumSwap,
