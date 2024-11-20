@@ -48,9 +48,9 @@ async function checkAndExecuteBuy() {
     // const solBalance = await getSolanaBalance(process.env.SOL_WALLET_ADDRESS);
     const {sol_balance:solBalance} = await getWalletInfo(process.env.SOL_WALLET_ADDRESS);
     // const requiredBalance = parseFloat(process.env.SOL_TRADE_AMOUNT) + parseFloat(process.env.SOL_PRIORITY_FEE);
-    log.info(`SOL 当前余额: ${solBalance} SOL`);
     const solMinBalance = process.env.SOL_MIN_BALANCE || 0
-    if (solBalance <= solMinBalance) {
+    log.info(`SOL 当前余额: ${solBalance} SOL,最新要余额为:${solMinBalance} SOL`,solBalance <= solMinBalance);
+    if (solBalance*1 <= solMinBalance*1) {
       log.info(`SOL 余额不足。当前余额: ${solBalance} SOL, 需要: ${solMinBalance} SOL`);
       return;
     }
