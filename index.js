@@ -47,10 +47,11 @@ async function checkAndExecuteBuy() {
   try {
     // 检查 SOL 余额
     const solBalance = await getSolanaBalance(process.env.SOL_WALLET_ADDRESS);
-    const requiredBalance = parseFloat(process.env.SOL_TRADE_AMOUNT) + parseFloat(process.env.SOL_PRIORITY_FEE);
+    // const requiredBalance = parseFloat(process.env.SOL_TRADE_AMOUNT) + parseFloat(process.env.SOL_PRIORITY_FEE);
     log.info(`SOL 当前余额: ${solBalance} SOL`);
-    if (solBalance < requiredBalance * 1.5) {
-      log.info(`SOL 余额不足。当前余额: ${solBalance} SOL, 需要: ${requiredBalance} SOL`);
+    const solMinBalance = process.env.SOL_MIN_BALANCE || 0
+    if (solBalance <= solMinBalance) {
+      log.info(`SOL 余额不足。当前余额: ${solBalance} SOL, 需要: ${solMinBalance} SOL`);
       return;
     }
     // 1. 获取热门token列表
@@ -341,6 +342,7 @@ async function executeTransferSPLToken(tokenMintAddress) {
       notify({
         message: `监控通知\n描述：转账失败\nWallet Address：${process.env.SOL_WALLET_ADDRESS}\nTOKEN地址：${tokenMintAddress}\n错误信息：${error}`
       })
+      await sleep(2);
     }
   }
   return attempts;
