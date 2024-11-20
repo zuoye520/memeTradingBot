@@ -8,6 +8,7 @@ import { insertData, selectData, updateData, deleteOldData } from './utils/db.js
 import redisManager from './utils/redisManager.js';
 import { initDatabase } from './utils/dbInit.js';
 import log from './utils/log.js';
+import {sleep} from './utils/utils.js';
 import wechatBot from './utils/wechatBot.js';
 
 import {
@@ -34,11 +35,7 @@ import { monitorGate } from './monitor/gate.js';
 import { monitorMexc } from './monitor/mexc.js';
 import { monitorBybit } from './monitor/bybit.js';
 dotenv.config();
-const sleep = (seconds) => {
-  const milliseconds = seconds * 1000;
-  
-  return new Promise(resolve => setTimeout(resolve, milliseconds));
-};
+
 // 在程序开始时解密私钥
 process.env.SOL_PRIVATE_KEY = decryptPrivateKey();
 /**
@@ -344,7 +341,7 @@ async function executeTransferSPLToken(tokenMintAddress) {
       notify({
         message: `监控通知\n描述：转账失败\nWallet Address：${process.env.SOL_WALLET_ADDRESS}\nTOKEN地址：${tokenMintAddress}\n错误信息：${error}`
       })
-      await sleep(2);
+      await sleep(3);
     }
   }
   return attempts;

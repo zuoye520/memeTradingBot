@@ -8,6 +8,7 @@ import { insertData, selectData, updateData, deleteOldData } from './utils/db.js
 import redisManager from './utils/redisManager.js';
 import { initDatabase } from './utils/dbInit.js';
 import log from './utils/log.js';
+import {sleep} from './utils/utils.js';
 import wechatBot from './utils/wechatBot.js';
 import {
   transferSPLToken,
@@ -33,14 +34,10 @@ import { monitorGate } from './monitor/gate.js';
 import { monitorMexc } from './monitor/mexc.js';
 import { monitorBybit } from './monitor/bybit.js';
 import { monitorBithumb } from './monitor/bithumb.js';
-
+import { monitorBitget } from './monitor/bitget.js';
 
 dotenv.config();
-const sleep = (seconds) => {
-  const milliseconds = seconds * 1000;
-  
-  return new Promise(resolve => setTimeout(resolve, milliseconds));
-};
+
 // 在程序开始时解密私钥
 process.env.SOL_PRIVATE_KEY = decryptPrivateKey();
 /**
@@ -398,6 +395,7 @@ async function runBot() {
     // } catch (error) {
     //   log.error('Failed to initialize WeChat bot:', error);
     // }
+    // monitorBitget()
     // monitorBithumb()
     // monitorBybit()
     // monitorTipTag()

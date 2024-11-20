@@ -401,6 +401,29 @@ async function getBybitArticleList() {
   }
 }
 /**
+ * Bybit 公告
+ * @returns 
+ */
+async function getBitgetArticleList() {
+  
+  try {
+    // 当前时间的 Unix 毫秒时间戳
+    const endTime = Date.now();
+    // 前一天的 Unix 毫秒时间戳
+    const oneDayInMillis = 24 * 60 * 60 * 1000;
+    const startTime = endTime - oneDayInMillis;
+    // 构建 API 请求 URL
+    let url = `https://api.bitget.com/api/v2/public/annoucements?annType=coin_listings&language=zh_CN&startTime=${startTime}&endTime=${endTime}`; 
+    console.log('getBitgetArticleList:',url)
+    const response = await sendRequest(url, { method: 'get' });
+    if(response.msg !=='success') throw response
+    return response.data;
+  } catch (error) {
+    console.error('getBitgetArticleList Error:', error);
+    throw error;
+  }
+}
+/**
  * bithumb 公告
  * @returns 
  */
@@ -464,5 +487,6 @@ export {
   getUpbitArticleList,
   getMexcArticleList,
   getBybitArticleList,
-  getBithumbArticleList
+  getBithumbArticleList,
+  getBitgetArticleList
 };

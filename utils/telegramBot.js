@@ -2,6 +2,7 @@ import { gmgnTokens } from '../api/apiService.js';
 import { sendRequest } from './httpUtils.js';
 import moment from 'moment';
 import log from './log.js';
+import { sleep } from './utils.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -46,6 +47,7 @@ async function sendMessage(params) {
     } catch (error) {
       log.error('Telegram 消息发送失败:', error);
       attempts++;
+      await sleep(3);
     }
   }
   return attempts;

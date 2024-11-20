@@ -1,7 +1,8 @@
 import { WechatyBuilder } from 'wechaty';
 import log from './log.js';
 import moment from 'moment';
-import { notify } from '../utils/notify.js';
+import { notify } from './notify.js';
+import { sleep } from './utils.js';
 
 class WechatBot {
   constructor() {
@@ -88,6 +89,7 @@ class WechatBot {
           } catch (error) {
             log.error(`Message sent to ${receiver} error`, error);
             attempts++;
+            await sleep(3);
           }
         }
       } else {
