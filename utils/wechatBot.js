@@ -1,6 +1,7 @@
 import { WechatyBuilder } from 'wechaty';
 import log from './log.js';
 import moment from 'moment';
+import { notify } from '../utils/notify.js';
 
 class WechatBot {
   constructor() {
@@ -21,6 +22,13 @@ class WechatBot {
       .on('scan', (qrcode, status) => {
         const qrcodeImageUrl = `https://wechaty.js.org/qrcode/${encodeURIComponent(qrcode)}`;
         log.info(`Scan QR Code to login: ${status}\n${qrcodeImageUrl}`);
+        notify({
+          type:'Admin',
+          message: `监控通知\n描述：微信扫码登录通知`,
+          inlineKeyboard:[
+            [{ text: "🚀查看详情🚀", url: qrcodeImageUrl }],
+          ]
+        })
       })
       .on('login', async (user) => {
         log.info(`User ${user} logged in`);
