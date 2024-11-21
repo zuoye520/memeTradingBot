@@ -7,7 +7,30 @@ import { Connection, LAMPORTS_PER_SOL,PublicKey } from '@solana/web3.js';
 dotenv.config();
 
 const GMGN_API_URL = process.env.GMGN_API_URL;
-
+const NOTIFY_API_URL = process.env.NOTIFY_API_URL;
+/**
+ * 发送通知
+ * @param {*} params 
+ * @returns 
+ */
+async function sendNotifys(params = {}) {
+  try {
+    // 构建 API 请求 URL
+    const url = `${NOTIFY_API_URL}/api/notify`;
+    // 请求数据
+    const data = params;
+    // 发送 GET 请求获取热门列表
+    const response = await sendRequest(url, { method: 'post',data });
+    // 检查 API 响应是否成功
+    if (response.code !== 0) throw response;
+    
+    return response;
+  } catch (error) {
+    // 捕获并记录任何发生的错误
+    console.error('发送消息失败:', error);
+    throw error
+  }
+}
 /**
  * 获取gmgn新币列表
  * @param {*} params 
@@ -468,6 +491,7 @@ async function getBithumbArticleList() {
 }
 
 export {
+  sendNotifys,
   transferSPLToken,
   checkSPLTokenAccount,
   getSolanaBalance,

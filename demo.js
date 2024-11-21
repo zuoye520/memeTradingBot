@@ -376,7 +376,7 @@ async function cleanupOldData() {
 
 async function test(){
   notify({
-    type:'Group',
+    type:'Admin',
     message:'测试微信Bot消息群发'
   })
 }
@@ -387,6 +387,7 @@ async function test(){
 async function runBot() {
   try {
     log.info('启动 GMGN.ai 交易机器人...');
+    // await test()
     // 检查 SOL 余额
     // const solBalance = await getWalletInfo(process.env.SOL_WALLET_ADDRESS);
     // log.info('solBalance:',solBalance)
