@@ -368,7 +368,7 @@ async function cleanupOldData() {
 async function runBot() {
   log.info('启动 GMGN.ai 交易机器人...');
   await initDatabase(); // 初始化数据库
-  if(process.env.WECHAT_NOTIFY === 'ON') await wechatBot.initialize();// 初始化微信Bot
+  // if(process.env.WECHAT_NOTIFY === 'ON') await wechatBot.initialize();// 初始化微信Bot
 
   // meme交易定时任务
   schedule.scheduleJob('checkAndExecuteBuy-task', `*/3 * * * * *`, async () => {
