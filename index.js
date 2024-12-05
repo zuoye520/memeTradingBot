@@ -452,21 +452,21 @@ async function runBot() {
     }
   });
   // Binance监控任务,每X秒执行一次
-  schedule.scheduleJob('monitorBinance-task', `*/10 * * * * *`, async () => {
-    const lockKey = 'monitorBinance_lock';
-    const lockSet = await redisManager.setTimeLock(lockKey, 20);//流程10秒
-    if (!lockSet) {
-      log.info('monitorBinance-task 锁已存在，操作被阻止');
-      return;
-    } 
-    try {
-      await monitorBinance();
-    } catch (error) {
-      log.error('monitorBinance task error:', error);
-    } finally{
-      await redisManager.del(lockKey);
-    }
-  });
+  // schedule.scheduleJob('monitorBinance-task', `*/10 * * * * *`, async () => {
+  //   const lockKey = 'monitorBinance_lock';
+  //   const lockSet = await redisManager.setTimeLock(lockKey, 20);//流程10秒
+  //   if (!lockSet) {
+  //     log.info('monitorBinance-task 锁已存在，操作被阻止');
+  //     return;
+  //   } 
+  //   try {
+  //     await monitorBinance();
+  //   } catch (error) {
+  //     log.error('monitorBinance task error:', error);
+  //   } finally{
+  //     await redisManager.del(lockKey);
+  //   }
+  // });
   // Upbit监控任务,每X秒执行一次
   schedule.scheduleJob('monitorUpbit-task', `*/10 * * * * *`, async () => {
     try {
