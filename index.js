@@ -444,13 +444,13 @@ async function runBot() {
     }
   });
   // tipTag监控任务,每X秒执行一次
-  schedule.scheduleJob('monitorTipTag-task', `*/10 * * * * *`, async () => {
-    try {
-      await monitorTipTag();
-    } catch (error) {
-      log.error('monitorTipTag task error:', error);
-    }
-  });
+  // schedule.scheduleJob('monitorTipTag-task', `*/10 * * * * *`, async () => {
+  //   try {
+  //     await monitorTipTag();
+  //   } catch (error) {
+  //     log.error('monitorTipTag task error:', error);
+  //   }
+  // });
   // Binance监控任务,每X秒执行一次
   // schedule.scheduleJob('monitorBinance-task', `*/10 * * * * *`, async () => {
   //   const lockKey = 'monitorBinance_lock';
