@@ -355,7 +355,7 @@ async function getBinanceArticleList() {
       const title = $(element).children().text()
       list.push({title,href});
     });
-    console.log('公告列表:', list);
+    // console.log('公告列表:', list);
     return list;
     // if(!response.success) throw response
     // return response.data.catalogs;
