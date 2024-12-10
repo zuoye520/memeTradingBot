@@ -1,5 +1,6 @@
 import { sendRequest } from '../utils/httpUtils.js';
 import * as cheerio from 'cheerio';
+import cloudscraper from 'cloudscraper';
 import dotenv from 'dotenv';
 import { executeSolanaSwap } from './solanaTrading.js';
 import RaydiumSwap from './raydiumSwap.js'
@@ -343,8 +344,9 @@ async function getBinanceArticleList() {
     let url = `https://www.binance.com/bapi/apex/v1/public/apex/cms/article/list/query?type=1&pageSize=5&pageNo=1`; 
     // let url = `https://www.binance.com/zh-CN/support/announcement/new-cryptocurrency-listing?c=48&navId=48`
     console.log('getBnArticleList:',url)
-    const response = await sendRequest(url, { method: 'get' });
-    console.log('getBinanceArticleList result:',response)
+    const result = await cloudscraper.get(url)
+    const response = JSON.parse(result)
+    // const response = await sendRequest(url, { method: 'get' });
     // const $ = cheerio.load(response);
     // const titles = [],
     //   times = [];

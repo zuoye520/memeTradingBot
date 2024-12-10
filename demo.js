@@ -403,7 +403,7 @@ async function runBot() {
     // monitorMexc()
     // monitorGate()
     // monitorOkx()
-    // monitorBinance()
+    monitorBinance()
     // monitorUpbit()
     // await initDatabase(); // 初始化数据库
     // // meme交易定时任务
