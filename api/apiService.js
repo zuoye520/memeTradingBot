@@ -340,8 +340,8 @@ async function getTipTagNewList(chain = 'base') {
 async function getBinanceArticleList() {
   try {
     // 构建 API 请求 URL
-    // let url = `https://www.binance.com/bapi/apex/v1/public/apex/cms/article/list/query?type=1&pageSize=5&pageNo=1`; 
-    let url = `https://www.binance.com/zh-CN/support/announcement/new-cryptocurrency-listing?c=48&navId=48`
+    let url = `https://www.binance.com/bapi/apex/v1/public/apex/cms/article/list/query?type=1&pageSize=5&pageNo=1`; 
+    // let url = `https://www.binance.com/zh-CN/support/announcement/new-cryptocurrency-listing?c=48&navId=48`
     console.log('getBnArticleList:',url)
     const response = await sendRequest(url, { method: 'get' });
     console.log('getBinanceArticleList result:',response)
