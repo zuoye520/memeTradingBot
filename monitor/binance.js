@@ -16,23 +16,24 @@ function getArticleLink(title, code) {
 }
 async function monitorBinance(){
   try {
-    const articleList = await getBinanceArticleList()
-    return;
-    const found = articleList.find(element => element.catalogId === 48);//catalogId:48 为上线新币或者Launchpool
-    const list = found.articles;
+    const list = await getBinanceArticleList()
+    // const found = articleList.find(element => element.catalogId === 48);//catalogId:48 为上线新币或者Launchpool
+    // const list = found.articles;
     // log.info('list:',list)
     //根据ID排序
-    list.sort((a, b) => b.id - a.id);
+    // list.sort((a, b) => b.id - a.id);
     lastArticle = !lastArticle ? list[0] : lastArticle
-    const {id,title,code,releaseDate} = list[0]
+    // const {id,title,code,releaseDate} = list[0]
+    const {title,href} = list[0]
 
-    if(lastArticle.id < id){
+    if(lastArticle.href != href){
       lastArticle = list[0]
-      const time = moment(releaseDate).format("YYYY/MM/DD HH:mm:ss");
-      const link = getArticleLink(title,code);
+      // const time = moment(releaseDate).format("YYYY/MM/DD HH:mm:ss");
+      // const link = getArticleLink(title,code);
+      const link = `https://www.binance.com${href}`
       notify({
         type:'Group',
-        message: `监控通知\n监控平台：Binance\n公告标题：${title}\n公告类型：新币种上线\n公告时间：${time}`,
+        message: `监控通知\n监控平台：Binance\n公告标题：${title}\n公告类型：新币种上线`,
         inlineKeyboard:[
           [{ text: "🚀查看公告详情🚀", url: link }],
         ]

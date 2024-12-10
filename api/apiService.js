@@ -1,6 +1,6 @@
 import { sendRequest } from '../utils/httpUtils.js';
 import * as cheerio from 'cheerio';
-import cloudscraper from 'cloudscraper';
+// import cloudscraper from 'cloudscraper';
 import dotenv from 'dotenv';
 import { executeSolanaSwap } from './solanaTrading.js';
 import RaydiumSwap from './raydiumSwap.js'
@@ -356,14 +356,15 @@ async function getBinanceArticleList() {
       list.push({title,href});
     });
     console.log('公告列表:', list);
-    return;
-    if(!response.success) throw response
-    return response.data.catalogs;
+    return list;
+    // if(!response.success) throw response
+    // return response.data.catalogs;
   } catch (error) {
     console.error('getBinanceArticleList Error:', error);
     throw error;
   }
 }
+
 /**
  * Upbit 公告
  * @returns 
