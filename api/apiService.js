@@ -1,4 +1,5 @@
 import { sendRequest } from '../utils/httpUtils.js';
+import * as cheerio from 'cheerio';
 import dotenv from 'dotenv';
 import { executeSolanaSwap } from './solanaTrading.js';
 import RaydiumSwap from './raydiumSwap.js'
@@ -339,9 +340,21 @@ async function getTipTagNewList(chain = 'base') {
 async function getBinanceArticleList() {
   try {
     // 构建 API 请求 URL
-    let url = `https://www.binance.com/bapi/apex/v1/public/apex/cms/article/list/query?type=1&pageSize=5&pageNo=1`; 
+    // let url = `https://www.binance.com/bapi/apex/v1/public/apex/cms/article/list/query?type=1&pageSize=5&pageNo=1`; 
+    let url = `https://www.binance.com/zh-CN/support/announcement/new-cryptocurrency-listing?c=48&navId=48`
     console.log('getBnArticleList:',url)
     const response = await sendRequest(url, { method: 'get' });
+    console.log('getBinanceArticleList result:',response)
+    // const $ = cheerio.load(response);
+    // const titles = [],
+    //   times = [];
+    // $('h3.typography-body1-1').each((index, element) => {
+    //   titles.push($(element).text().trim());
+    // });
+    // $('div[class="typography-caption1 noH5:typography-body1-1 text-TertiaryText mobile:text-SecondaryText"]').each((index, element) => {
+    //   times.push($(element).text().trim());
+    // });
+    // console.log('公告标题:', titles,times);
     if(!response.success) throw response
     return response.data.catalogs;
   } catch (error) {
