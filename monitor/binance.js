@@ -17,6 +17,7 @@ function getArticleLink(title, code) {
 async function monitorBinance(){
   try {
     const articleList = await getBinanceArticleList()
+    return;
     const found = articleList.find(element => element.catalogId === 48);//catalogId:48 为上线新币或者Launchpool
     const list = found.articles;
     // log.info('list:',list)

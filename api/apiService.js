@@ -341,22 +341,22 @@ async function getTipTagNewList(chain = 'base') {
 async function getBinanceArticleList() {
   try {
     // 构建 API 请求 URL
-    let url = `https://www.binance.com/bapi/apex/v1/public/apex/cms/article/list/query?type=1&pageSize=5&pageNo=1`; 
-    // let url = `https://www.binance.com/zh-CN/support/announcement/new-cryptocurrency-listing?c=48&navId=48`
+    // let url = `https://www.binance.com/bapi/apex/v1/public/apex/cms/article/list/query?type=1&pageSize=5&pageNo=1`; 
+    let url = `https://www.binance.com/zh-CN/support/announcement/new-cryptocurrency-listing?c=48&navId=48`
     console.log('getBnArticleList:',url)
-    const result = await cloudscraper.get(url)
-    const response = JSON.parse(result)
-    // const response = await sendRequest(url, { method: 'get' });
-    // const $ = cheerio.load(response);
-    // const titles = [],
-    //   times = [];
+    const response = await sendRequest(url, { method: 'get' });
+    const $ = cheerio.load(response);
+    const list = [];
     // $('h3.typography-body1-1').each((index, element) => {
     //   titles.push($(element).text().trim());
     // });
-    // $('div[class="typography-caption1 noH5:typography-body1-1 text-TertiaryText mobile:text-SecondaryText"]').each((index, element) => {
-    //   times.push($(element).text().trim());
-    // });
-    // console.log('公告标题:', titles,times);
+    $('a[class="text-PrimaryText hover:text-PrimaryYellow active:text-PrimaryYellow focus:text-PrimaryYellow cursor-pointer no-underline w-fit"]').each((index, element) => {
+      const href = $(element).attr('href')
+      const title = $(element).children().text()
+      list.push({title,href});
+    });
+    console.log('公告列表:', list);
+    return;
     if(!response.success) throw response
     return response.data.catalogs;
   } catch (error) {
